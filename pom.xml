@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.cofinpro</groupId>
-    <artifactId>myblockchain</artifactId>
+    <artifactId>blockchain</artifactId>
     <version>0.1-SNAPSHOT</version>
     <name>Blockchain</name>
     <description>Toy project Blockchain from JetBrains Academy</description>

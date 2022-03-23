@@ -1,11 +1,11 @@
 package de.cofinpro.blockchain;
 
-import lombok.extern.slf4j.Slf4j;
+import de.cofinpro.blockchain.config.BlockchainConfig;
+import de.cofinpro.blockchain.controller.BlockchainController;
 
-@Slf4j
 public class Main {
 
     public static void main(String[] args) {
-        log.info("Welcome to Blockchains !");
+        new BlockchainController(BlockchainConfig.NUMBER_OF_BLOCKS).run();
     }
 }
