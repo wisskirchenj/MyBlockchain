@@ -1,5 +1,6 @@
 package de.cofinpro.blockchain.model;
 
+import java.io.Serial;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -9,6 +10,9 @@ import java.util.LinkedList;
  * to print its content.
  */
 public class Blockchain extends LinkedList<Block> {
+
+    @Serial
+    private static final long serialVersionUID = 10L;
 
     public void addBlock(Block block) {
         add(block);

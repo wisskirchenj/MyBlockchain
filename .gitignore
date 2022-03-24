@@ -129,7 +129,9 @@ target/
 mvnw*
 .mvn
 
+# additions by myself...
 *.db
+*.ser
 
 HELP.md
 

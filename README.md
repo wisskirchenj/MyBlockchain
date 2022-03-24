@@ -16,3 +16,5 @@ tasks will be included.
 ## Progress
 
 22.03.22 Project started. IDEA-setup and first repo.
+
+23.03.22 Stage 1 completed, basic OOD according to MVC with BlockFactory
