@@ -1,7 +1,7 @@
 package de.cofinpro.blockchain.model;
 
 /**
- * thread-safe block factory, that creates blocks wioth ascending id's.
+ * thread-safe block factory, that creates blocks with ascending id's.
  * It does not wait for the hash-creations - so this can be decoupled (if needed..).
  */
 public class BlockFactory {
@@ -9,6 +9,7 @@ public class BlockFactory {
     private static volatile int createdCount = 0;
 
     private BlockFactory() {
+        // no instantiation
     }
 
     /**
@@ -17,10 +18,14 @@ public class BlockFactory {
      * @return created block
      */
     public static Block getNextBlock(String previousHash) {
-        return new Block(incrementBlockCounter(), previousHash);
+        return new SimpleBlock(incrementBlockCounter(), previousHash);
     }
 
     private static synchronized int incrementBlockCounter() {
        return ++createdCount;
+    }
+
+    public static void setIdOffset(int currentBlockchainLength) {
+        createdCount = currentBlockchainLength;
     }
 }

@@ -6,6 +6,6 @@ import de.cofinpro.blockchain.controller.BlockchainController;
 public class Main {
 
     public static void main(String[] args) {
-        new BlockchainController(BlockchainConfig.BLOCKCHAIN_LENGTH).run();
+        new BlockchainController().run(BlockchainConfig.BLOCKCHAIN_LENGTH);
     }
 }

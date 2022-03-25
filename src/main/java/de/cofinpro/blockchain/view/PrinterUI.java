@@ -1,6 +1,5 @@
 package de.cofinpro.blockchain.view;
 
-import de.cofinpro.blockchain.model.Blockchain;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -9,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PrinterUI {
 
-    public void printBlockchain(Blockchain blockchain) {
+    public void print(Object blockchain) {
         log.info(blockchain.toString());
     }
 
