@@ -1,6 +1,7 @@
 package de.cofinpro.blockchain.model;
 
 import de.cofinpro.blockchain.controller.Cryptographic;
+
 import java.security.NoSuchAlgorithmException;
 
 public class SimpleBlockFactory extends BlockFactory {

@@ -1,8 +1,10 @@
 package de.cofinpro.blockchain.controller;
 
-import de.cofinpro.blockchain.model.*;
+import de.cofinpro.blockchain.model.Blockchain;
+import de.cofinpro.blockchain.model.InvalidBlockchainException;
 import de.cofinpro.blockchain.view.PrinterUI;
 import de.cofinpro.blockchain.view.ScannerUI;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
