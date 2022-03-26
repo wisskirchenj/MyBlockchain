@@ -18,3 +18,5 @@ tasks will be included.
 22.03.22 Project started. IDEA-setup and first repo.
 
 23.03.22 Stage 1 completed, basic OOD according to MVC with BlockFactory
+
+26.03.22 Stage 2 completed, Factory Method pattern, Serialization added
