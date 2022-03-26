@@ -6,8 +6,12 @@
 
     <groupId>de.cofinpro</groupId>
     <artifactId>blockchain</artifactId>
+    <packaging>pom</packaging>
     <version>0.1-SNAPSHOT</version>
-    <name>Blockchain</name>
+    <modules>
+        <module>topics</module>
+    </modules>
+    <name>MyBlockchain</name>
     <description>Toy project Blockchain from JetBrains Academy</description>
 
     <properties>

@@ -2,7 +2,7 @@ package de.cofinpro.blockchain.controller;
 
 import de.cofinpro.blockchain.model.*;
 import de.cofinpro.blockchain.view.PrinterUI;
-
+import de.cofinpro.blockchain.view.ScannerUI;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
@@ -14,14 +14,15 @@ public class BlockchainController {
 
     // not final so they can be mocked...
     private PrinterUI printer = new PrinterUI();
+    private ScannerUI scanner = new ScannerUI();
 
     /**
      * entry point invoked by Main after creation of this controller.
      */
-    public void run(int blockchainLength) {
+    public void run() {
         try {
             Blockchain blockchain = Blockchain.getSerializer().deserialize();
-            blockchain.continueGeneration(blockchainLength);
+            blockchain.continueGeneration(scanner.promptForZeros());
             printer.print(blockchain);
         } catch (NoSuchAlgorithmException e) {
             printer.error("SHA256 algorithm not implemented! ");

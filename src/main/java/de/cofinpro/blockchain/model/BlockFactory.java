@@ -1,31 +1,27 @@
 package de.cofinpro.blockchain.model;
 
+import java.security.NoSuchAlgorithmException;
+
 /**
- * thread-safe block factory, that creates blocks with ascending id's.
- * It does not wait for the hash-creations - so this can be decoupled (if needed..).
+ * Abstract base class for the implementation of the "factory method" creation pattern.
+ * Our abstract block factory provides the basic creation workflow for a block.
+ * Typically, it is invoked by y a Blockchain.
  */
-public class BlockFactory {
-
-    private static volatile int createdCount = 0;
-
-    private BlockFactory() {
-        // no instantiation
-    }
+public abstract class BlockFactory {
 
     /**
-     * the factory method that provides the next block
-     * @param previousHash previousHash, that the created block gets set.
+     * the factory method that creates a new block block
+     * @param id the id of the block to create
+     * @param previousHash previousHash the hash link to the previous created block in a blockchain.
      * @return created block
      */
-    public static Block getNextBlock(String previousHash) {
-        return new SimpleBlock(incrementBlockCounter(), previousHash);
+    public Block createBlock(int id, String previousHash) throws NoSuchAlgorithmException {
+        Block block = newBlockInstance(id, previousHash);
+        setHashRelatedFields(block);
+        return block;
     }
 
-    private static synchronized int incrementBlockCounter() {
-       return ++createdCount;
-    }
+    protected abstract Block newBlockInstance(int id, String previousHash);
 
-    public static void setIdOffset(int currentBlockchainLength) {
-        createdCount = currentBlockchainLength;
-    }
+    protected abstract void setHashRelatedFields(Block block) throws NoSuchAlgorithmException;
 }

@@ -1,11 +1,10 @@
 package de.cofinpro.blockchain.model;
 
-import de.cofinpro.blockchain.controller.Cryptographic;
+import de.cofinpro.blockchain.config.BlockchainConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
 import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -28,6 +27,9 @@ public class Blockchain extends LinkedList<Block> {
         return serializer;
     }
 
+    private transient BlockFactory blockFactory;
+    private transient BlockchainValidator validator;
+
     /**
      * Central method that performs the generation of this blockchain. If the blockchain
      * already contains blocks, the generation adds to the end until the given
@@ -36,23 +38,33 @@ public class Blockchain extends LinkedList<Block> {
      * Then the hash for this block is calculated, set and the block is added to the Blockchain.
      * @throws NoSuchAlgorithmException in case computer has no SHA256 installed
      */
-    public void continueGeneration(int blockchainLength) throws NoSuchAlgorithmException {
-        resetIfInvalid();
+    public void continueGeneration(int leadingHashZeros) throws NoSuchAlgorithmException {
+        initBlockChain(leadingHashZeros);
+        resetIfInvalid(validator);
         int currentBlockchainLength = size();
-        BlockFactory.setIdOffset(currentBlockchainLength);
         String previousHash = currentBlockchainLength == 0 ? "0" : getLast().getHash();
 
-        for (int i = currentBlockchainLength; i < blockchainLength; i++) {
+        for (int i = currentBlockchainLength; i < BlockchainConfig.BLOCKCHAIN_LENGTH; i++) {
             Block newBlock = computeAndAddBlock(previousHash);
             serializer.serialize(this);
             previousHash = newBlock.getHash();
         }
-        validate();
+        validator.validate(this);
     }
 
-    private void resetIfInvalid() {
+    private Block computeAndAddBlock(String previousHash) throws NoSuchAlgorithmException {
+        Block block = blockFactory.createBlock(size() + 1, previousHash);
+        add(block);
+        return block;
+    }
+
+    /**
+     * before continuing generation, this method is called to check, if the deserializes blockchain state
+     * matches the validation rules.
+     */
+    private void resetIfInvalid(BlockchainValidator validator) {
         try {
-            validate();
+            validator.validate(this);
         } catch (InvalidBlockchainException exception) {
             log.warn("Invalid blockchain deserialized!\nStart generating from scratch.");
             clear();
@@ -60,30 +72,15 @@ public class Blockchain extends LinkedList<Block> {
     }
 
     /**
-     * validates this blockchain by checking the previousHash field matches with the hash of the next block.
-     * The method starts with last block and moves to the beginning of the chain.
-     * @throws InvalidBlockchainException extends RuntimeException if blockchain is invalid.
+     * depending on user input, the blockchain sets the adequate concrete BlockFactory.
+     * SimpleBlock-creation is used if no leading zeros are requested, MagicBlock-creation is needed otherwise.
+     * The # of leading zeros is also stored as (transient) member for validation purpose.
+     * @param leadingHashZeros the requested leading zeros for block hashes
      */
-    private void validate() throws InvalidBlockchainException {
-        if (isEmpty()) {
-            return;
-        }
-        Iterator<Block> iterator = descendingIterator();
-        Block block = iterator.next();
-        while (iterator.hasNext()) {
-            Block previousBlock = iterator.next();
-            if (!block.hashMatchesPrevious(previousBlock)) {
-                throw new InvalidBlockchainException("Invalid blockchain!");
-            }
-            block = previousBlock;
-        }
-    }
-
-    private Block computeAndAddBlock(String previousHash) throws NoSuchAlgorithmException {
-        Block block = BlockFactory.getNextBlock(previousHash);
-        block.setHash(Cryptographic.applySha256(block.toString()));
-        add(block);
-        return block;
+    private void initBlockChain(int leadingHashZeros) {
+        blockFactory = leadingHashZeros == 0
+                ? new SimpleBlockFactory() : new MagicBlockFactory(leadingHashZeros);
+        validator = new BlockchainValidator(leadingHashZeros);
     }
 
     @Override

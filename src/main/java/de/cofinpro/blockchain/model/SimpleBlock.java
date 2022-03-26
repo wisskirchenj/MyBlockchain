@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.util.Date;
 
 /**
- * Data object, that represents one block unit, of which the blockchain is assembled.
+ * Data object, that represents one block unit of type SimpleBlock, of which the blockchain is assembled.
  */
 @AllArgsConstructor
 @NoArgsConstructor
