@@ -11,7 +11,7 @@ topics are investigated.
 ## Repository Contents
 
 Beside the main project tasks (6 stages), all relevant Topic-associated development
-tasks will be included.
+tasks will be included. 
 
 ## Progress
 
