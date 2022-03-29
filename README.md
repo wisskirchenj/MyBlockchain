@@ -20,3 +20,5 @@ tasks will be included.
 23.03.22 Stage 1 completed, basic OOD according to MVC with BlockFactory
 
 26.03.22 Stage 2 completed, Factory Method pattern, Serialization added
+
+29.03.22 Stage 3 completed, block creation in thread pool with load balancing

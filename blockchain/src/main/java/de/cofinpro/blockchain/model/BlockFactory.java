@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
 public abstract class BlockFactory {
 
     /**
-     * the factory method that creates a new block block
+     * the factory method that creates a new block
      * @param id the id of the block to create
      * @param previousHash previousHash the hash link to the previous created block in a blockchain.
      * @return created block

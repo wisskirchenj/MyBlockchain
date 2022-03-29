@@ -9,7 +9,9 @@ import java.util.Date;
 
 /**
  * Data object, that represents one block unit of type SimpleBlock, of which the blockchain is assembled.
+ * @deprecated
  */
+@Deprecated(since = "25.03.22")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -36,6 +38,24 @@ public class SimpleBlock implements Block {
     public String toString() {
         return "Block:%nId: %d%nTimestamp: %d%nHash of the previous block:%n%s%nHash of the block:%n%s%n%n"
                 .formatted(id, timestamp, previousHash, hash);
+    }
+
+    /**
+     * simple blocks have no leading zeros
+     * @return always 0
+     */
+    @Override
+    public int getLeadingHashZeros() {
+        return 0;
+    }
+
+    /**
+     * not implemented for SimpleBlock
+     * @return always 0
+     */
+    @Override
+    public long getElapsedTimeInSeconds() {
+        return 0;
     }
 }
 

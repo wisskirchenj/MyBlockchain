@@ -4,6 +4,11 @@ import de.cofinpro.blockchain.controller.Cryptographic;
 
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Data object, that represents one block unit of type SimpleBlock, of which the blockchain is assembled.
+ * @deprecated
+ */
+@Deprecated(forRemoval = true) // was only used in stage 1
 public class SimpleBlockFactory extends BlockFactory {
 
     @Override

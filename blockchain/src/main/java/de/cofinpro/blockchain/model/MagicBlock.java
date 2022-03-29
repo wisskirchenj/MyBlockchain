@@ -15,14 +15,17 @@ import java.util.Date;
 @Data
 public class MagicBlock implements Block {
     @Serial
-    private static final long serialVersionUID = 30L;
+    private static final long serialVersionUID = 34L;
+
 
     private long id;
     private long timestamp;
-    private long elapsedTime;
+    private long elapsedTimeInSeconds;
     private int magicNumber;
     private String previousHash;
     private String hash = "";
+    private int leadingHashZeros;
+    private int minerId = 0;
 
     public MagicBlock(int id, String previousHash) {
         this.id = id;
@@ -36,8 +39,8 @@ public class MagicBlock implements Block {
      */
     @Override
     public String toString() {
-        return ("Block:%nId: %d%nTimestamp: %d%nMagic number: %d%nHash of the previous block:%n%s%n" +
-                "Hash of the block:%n%s%nBlock was generating for %d seconds%n%n")
-                .formatted(id, timestamp, magicNumber, previousHash, hash, elapsedTime);
+        return ("Block:%nCreated by miner # %d%nId: %d%nTimestamp: %d%nMagic number: %d%nHash of the previous block:%n%s%n" +
+                "Hash of the block:%n%s%nBlock was generating for %d seconds%n")
+                .formatted(minerId, id, timestamp, magicNumber, previousHash, hash, elapsedTimeInSeconds);
     }
 }

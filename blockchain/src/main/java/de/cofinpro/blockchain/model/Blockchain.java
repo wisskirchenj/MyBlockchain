@@ -4,7 +4,6 @@ import de.cofinpro.blockchain.config.BlockchainConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
-import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 
 /**
@@ -16,55 +15,43 @@ import java.util.LinkedList;
 public class Blockchain extends LinkedList<Block> {
 
     @Serial
-    private static final long serialVersionUID = 10L;
+    private static final long serialVersionUID = 11L;
 
-    private static final BlockchainSerializer serializer = new BlockchainSerializer();
+    private static final BlockchainValidator VALIDATOR = new BlockchainValidator();
+    private static final BlockchainSerializer SERIALIZER = new BlockchainSerializer();
 
     /**
      * getter for private class serializer - we don't want someone to replace it.
      */
     public static BlockchainSerializer getSerializer() {
-        return serializer;
+        return SERIALIZER;
     }
 
-    private transient BlockFactory blockFactory;
-    private transient BlockchainValidator validator;
+    private transient int currentLeadingHashZeros = 0;
 
     /**
-     * Central method that performs the generation of this blockchain. If the blockchain
-     * already contains blocks, the generation adds to the end until the given
-     * amount of blocks is reached.
-     * It uses BlockFactory to create a block with next free id.
-     * Then the hash for this block is calculated, set and the block is added to the Blockchain.
-     * @throws NoSuchAlgorithmException in case computer has no SHA256 installed
+     * validates and adds a new block (as typically received by a miner). Also, a serialization of the
+     * extended chain is done to avoid data loss. The method and the adaptLeadingHashZeros below are synchronized
+     * to avoid mismatched validations. (adding must be left before adapting the field)
+     * @param newBlock the received block
+     * @return false if block invalid (it is not added in that case), true else
      */
-    public void continueGeneration(int leadingHashZeros) throws NoSuchAlgorithmException {
-        initBlockChain(leadingHashZeros);
-        resetIfInvalid(validator);
-        int currentBlockchainLength = size();
-        String previousHash = currentBlockchainLength == 0 ? "0" : getLast().getHash();
-
-        for (int i = currentBlockchainLength; i < BlockchainConfig.BLOCKCHAIN_LENGTH; i++) {
-            Block newBlock = computeAndAddBlock(previousHash);
-            serializer.serialize(this);
-            previousHash = newBlock.getHash();
+    public synchronized boolean addBlock(Block newBlock) {
+        if (!VALIDATOR.isNewBlockValid(this, newBlock, currentLeadingHashZeros)) {
+            return false;
         }
-        validator.validate(this);
-    }
-
-    private Block computeAndAddBlock(String previousHash) throws NoSuchAlgorithmException {
-        Block block = blockFactory.createBlock(size() + 1, previousHash);
-        add(block);
-        return block;
+        add(newBlock);
+        SERIALIZER.serialize(this);
+        return true;
     }
 
     /**
      * before continuing generation, this method is called to check, if the deserializes blockchain state
      * matches the validation rules.
      */
-    private void resetIfInvalid(BlockchainValidator validator) {
+    public void resetIfInvalid() {
         try {
-            validator.validate(this);
+            VALIDATOR.validateChain(this);
         } catch (InvalidBlockchainException exception) {
             log.warn("Invalid blockchain deserialized!\nStart generating from scratch.");
             clear();
@@ -72,21 +59,41 @@ public class Blockchain extends LinkedList<Block> {
     }
 
     /**
-     * depending on user input, the blockchain sets the adequate concrete BlockFactory.
-     * SimpleBlock-creation is used if no leading zeros are requested, MagicBlock-creation is needed otherwise.
-     * The # of leading zeros is also stored as (transient) member for validation purpose.
-     * @param leadingHashZeros the requested leading zeros for block hashes
+     * Adapts the requested leading zeros for a new block creation according to the computation time of the last block.
+     * Purpose is to stabilize computation times to some wanted computation time range (as set in the BlockchainConfig).
+     * This method and the addBlock above are synchronized
+     * to avoid mismatched validations. (adding must be left before adapting the field)
+     * @return the adapted number of leading zeros
      */
-    private void initBlockChain(int leadingHashZeros) {
-        blockFactory = leadingHashZeros == 0
-                ? new SimpleBlockFactory() : new MagicBlockFactory(leadingHashZeros);
-        validator = new BlockchainValidator(leadingHashZeros);
+    public synchronized int adaptLeadingHashZeros() {
+        if (getLast().getElapsedTimeInSeconds() < BlockchainConfig.BLOCK_MIN_CREATION_SECONDS) {
+            ++currentLeadingHashZeros;
+        } else if (getLast().getElapsedTimeInSeconds() > BlockchainConfig.BLOCK_MAX_CREATION_SECONDS) {
+            --currentLeadingHashZeros;
+        }
+        return currentLeadingHashZeros;
+    }
+
+    /**
+     * Helper Method for toString() to satisfy specified logger output.
+     */
+    private String getChangeOfZeroText(int leadingZeros, int nextLeadingZeros) {
+        if (leadingZeros > nextLeadingZeros) {
+            return "N was decreased by 1\n\n";
+        } else if (leadingZeros < nextLeadingZeros) {
+            return "N was increased to %d%n%n".formatted(nextLeadingZeros);
+        }
+        return "N stays the same\n\n";
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        forEach(builder::append);
+        for (int i = 0; i < size(); i++) {
+            builder.append(get(i));
+            builder.append(getChangeOfZeroText(get(i).getLeadingHashZeros(),
+                    i < size() - 1 ? get(i + 1).getLeadingHashZeros() : currentLeadingHashZeros));
+        }
         return builder.toString();
     }
 

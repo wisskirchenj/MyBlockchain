@@ -6,6 +6,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Random;
 
+/**
+ * Concrete block factory (by Factory method pattern), that can create one block type - the MagicBlock.
+ */
 public class MagicBlockFactory extends BlockFactory {
 
     private final String leadingZeroString;
@@ -29,8 +32,9 @@ public class MagicBlockFactory extends BlockFactory {
         do {
             magicBlock.setMagicNumber(random.nextInt(Integer.MAX_VALUE));
             hash = Cryptographic.applySha256(block.toString());
-        } while (!hash.startsWith(leadingZeroString));
+        } while (!hash.startsWith(leadingZeroString) && !Thread.interrupted());
         magicBlock.setHash(hash);
-        magicBlock.setElapsedTime((new Date().getTime() - magicBlock.getTimestamp()) / 1000);
+        magicBlock.setElapsedTimeInSeconds((new Date().getTime() - magicBlock.getTimestamp()) / 1000);
+        magicBlock.setLeadingHashZeros(leadingZeroString.length());
     }
 }
