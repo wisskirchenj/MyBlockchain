@@ -27,7 +27,7 @@ public class Blockchain extends LinkedList<Block> {
         return SERIALIZER;
     }
 
-    private transient int currentLeadingHashZeros = 0;
+    private transient volatile int currentLeadingHashZeros = 0;
 
     /**
      * validates and adds a new block (as typically received by a miner). Also, a serialization of the

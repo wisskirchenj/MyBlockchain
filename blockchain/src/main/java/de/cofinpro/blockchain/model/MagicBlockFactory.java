@@ -31,7 +31,7 @@ public class MagicBlockFactory extends BlockFactory {
         String hash;
         do {
             magicBlock.setMagicNumber(random.nextInt(Integer.MAX_VALUE));
-            hash = Cryptographic.applySha256(block.toString());
+            hash = Cryptographic.applySha256(magicBlock.toString());
         } while (!hash.startsWith(leadingZeroString) && !Thread.interrupted());
         magicBlock.setHash(hash);
         magicBlock.setElapsedTimeInSeconds((new Date().getTime() - magicBlock.getTimestamp()) / 1000);
