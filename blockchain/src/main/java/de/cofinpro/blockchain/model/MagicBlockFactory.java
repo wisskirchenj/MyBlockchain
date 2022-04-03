@@ -23,18 +23,23 @@ public class MagicBlockFactory extends BlockFactory {
         return new MagicBlock(id, previousHash);
     }
 
+    /**
+     * computation intensive step of the block creation, where the hash is calculated until it satisfies
+     * sufficient leading zeros - method is also called from DataBlock subclasses without overriding and uses the
+     * toStringCashed() method of the data carrying Block object in this case. :-)
+     * That way, the hash creation includes the block's data.
+     * @param block block to enhance
+     * @throws NoSuchAlgorithmException if SHA256 not implemented
+     */
     @Override
     protected void setHashRelatedFields(Block block) throws NoSuchAlgorithmException {
-        if (!(block instanceof MagicBlock magicBlock)) {
-            return;
-        }
         String hash;
         do {
-            magicBlock.setMagicNumber(random.nextInt(Integer.MAX_VALUE));
-            hash = Cryptographic.applySha256(magicBlock.toString());
+            block.setMagicNumber(random.nextInt(Integer.MAX_VALUE));
+            hash = Cryptographic.applySha256(block.toString());
         } while (!hash.startsWith(leadingZeroString) && !Thread.interrupted());
-        magicBlock.setHash(hash);
-        magicBlock.setElapsedTimeInSeconds((new Date().getTime() - magicBlock.getTimestamp()) / 1000);
-        magicBlock.setLeadingHashZeros(leadingZeroString.length());
+        block.setHash(hash);
+        block.setElapsedTimeInSeconds((new Date().getTime() - block.getTimestamp()) / 1000);
+        block.setLeadingHashZeros(leadingZeroString.length());
     }
 }

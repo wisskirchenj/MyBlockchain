@@ -22,3 +22,5 @@ tasks will be included.
 26.03.22 Stage 2 completed, Factory Method pattern, Serialization added
 
 29.03.22 Stage 3 completed, block creation in thread pool with load balancing
+
+02.04.22 Stage 4 completed, asynchronous message queue with posting client threads, chat history stored as block data in blockchain

@@ -17,12 +17,13 @@ import java.util.Date;
 @Data
 public class SimpleBlock implements Block {
     @Serial
-    private static final long serialVersionUID = 20L;
+    private static final long serialVersionUID = 21L;
 
     private long id;
     private long timestamp;
     private String previousHash;
     private String hash = "";
+    private int minerId = 0;
 
     public SimpleBlock(long id, String previousHash) {
         this.id = id;
@@ -47,6 +48,21 @@ public class SimpleBlock implements Block {
     @Override
     public int getLeadingHashZeros() {
         return 0;
+    }
+
+    @Override
+    public void setElapsedTimeInSeconds(long elapsedTimeInSeconds) {
+        //
+    }
+
+    @Override
+    public void setLeadingHashZeros(int leadingHashZeros) {
+        //
+    }
+
+    @Override
+    public void setMagicNumber(int magicNumber) {
+        //
     }
 
     /**

@@ -1,8 +1,7 @@
 package de.cofinpro.blockchain.controller;
 
 import de.cofinpro.blockchain.model.Block;
-import de.cofinpro.blockchain.model.BlockFactory;
-import de.cofinpro.blockchain.model.MagicBlock;
+import de.cofinpro.blockchain.model.ChatDataBlockFactory;
 
 import java.util.concurrent.Callable;
 
@@ -14,24 +13,24 @@ public class MineTask implements Callable<Block> {
 
     private final int id;
     private final String previousHash;
-    private final BlockFactory blockFactory;
+    private final ChatDataBlockFactory blockFactory;
 
-    public MineTask(BlockFactory blockFactory, int id,  String previousHash) {
+    public MineTask(ChatDataBlockFactory blockFactory, int id, String previousHash) {
         this.blockFactory = blockFactory;
         this.id = id;
         this.previousHash = previousHash;
     }
 
     /**
-     * Computes a result, or throws an exception if unable to do so.
-     * @return computed result
+     * Computes a new block with chat data stored, or throws an exception if unable to do so.
+     * @return computed block
      * @throws Exception if unable to compute a result
      */
     @Override
     public Block call() throws Exception {
         Block block = blockFactory.createBlock(id, previousHash);
         String threadName = Thread.currentThread().getName();
-        ((MagicBlock) block).setMinerId(Integer.parseInt(threadName.substring(threadName.lastIndexOf('-') + 1)));
+        block.setMinerId(Integer.parseInt(threadName.substring(threadName.lastIndexOf('-') + 1)));
         return block;
     }
 }

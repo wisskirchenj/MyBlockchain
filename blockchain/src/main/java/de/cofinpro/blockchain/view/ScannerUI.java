@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 /**
  * simple UI-class, that cares about prompting the user for input and returning it to application controllers.
+ * not used in stages 3 and 4
  */
 @Slf4j
 public class ScannerUI {

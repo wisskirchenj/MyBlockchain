@@ -15,7 +15,7 @@ import java.util.Date;
 @Data
 public class MagicBlock implements Block {
     @Serial
-    private static final long serialVersionUID = 34L;
+    private static final long serialVersionUID = 35L;
 
 
     private long id;
@@ -34,13 +34,22 @@ public class MagicBlock implements Block {
     }
 
     /**
-     * message output as desired by project specification (stage 2).
+     * String representation output as desired by project specification (stage 2 ff.).
+     * string formatting has been split into two protected methods for usage in subclasses.
      * @return the message to output
      */
     @Override
     public String toString() {
-        return ("Block:%nCreated by miner # %d%nId: %d%nTimestamp: %d%nMagic number: %d%nHash of the previous block:%n%s%n" +
-                "Hash of the block:%n%s%nBlock was generating for %d seconds%n")
-                .formatted(minerId, id, timestamp, magicNumber, previousHash, hash, elapsedTimeInSeconds);
+        return getBlockStateString() + getGeneratingString();
+    }
+
+    protected String getBlockStateString() {
+        return ("Block:%nCreated by miner # %d%nId: %d%nTimestamp: %d%nMagic number: %d%n" +
+                "Hash of the previous block:%n%s%nHash of the block:%n%s%n")
+                .formatted(minerId, id, timestamp, magicNumber, previousHash, hash);
+    }
+
+    protected String getGeneratingString() {
+        return "Block was generating for %d seconds%n".formatted(elapsedTimeInSeconds);
     }
 }

@@ -9,8 +9,8 @@ import java.util.Iterator;
 public class BlockchainValidator {
 
     /**
-     * validates this blockchain by checking the previousHash field matches with the hash of the next block.
-     * The method starts with last block and moves to the beginning of the chain.
+     * validates the whole blockchain regarding hash validation as well as leading zero validation.
+     * @param blockchain the chain to validate
      * @throws InvalidBlockchainException extends RuntimeException if blockchain is invalid.
      */
     public void validateChain(Blockchain blockchain) throws InvalidBlockchainException {
@@ -21,6 +21,13 @@ public class BlockchainValidator {
         performLeadingZerosValidation(blockchain);
     }
 
+    /**
+     * performs hash validation on this blockchain by checking, that the previousHash field matches
+     * the hash of the next block.
+     * The method starts with last block and moves to the beginning of the chain.
+     * @param blockchain the chain to validate
+     * @throws InvalidBlockchainException extends RuntimeException if blockchain is invalid.
+     */
     private void performHashValidation(Blockchain blockchain) throws InvalidBlockchainException {
         Iterator<Block> iterator = blockchain.descendingIterator();
         Block block = iterator.next();
@@ -29,10 +36,14 @@ public class BlockchainValidator {
             if (!block.hashMatchesPrevious(previousBlock)) {
                 throw new InvalidBlockchainException("Invalid blockchain!");
             }
-            block = previousBlock;
+                    block = previousBlock;
         }
     }
-
+    /**
+     * method, that validates, if the block has at least as many leading hash zeros as required (block field)
+     * @param blockchain the chain to validate
+     * @throws InvalidBlockchainException extends RuntimeException if blockchain is invalid.
+     */
     private void performLeadingZerosValidation(Blockchain blockchain) throws InvalidBlockchainException {
         for (Block block : blockchain) {
             if (!block.getHash().startsWith("0".repeat(block.getLeadingHashZeros()))) {
@@ -44,7 +55,7 @@ public class BlockchainValidator {
     /**
      * validates a new block - is called by blockchain before adding this block to the chain.
      * @param blockchain the blockchain
-     * @param newBlock th new block to validate
+     * @param newBlock the new block to validate
      * @param leadingHashZeros the requested leading hash zeros
      * @return validation result
      */
