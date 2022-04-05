@@ -1,10 +1,14 @@
 package de.cofinpro.blockchain.controller;
 
 import de.cofinpro.blockchain.model.*;
+import de.cofinpro.blockchain.security.RSAGenerator;
 import de.cofinpro.blockchain.view.PrinterUI;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -23,23 +27,23 @@ import static de.cofinpro.blockchain.config.BlockchainConfig.*;
 @Slf4j
 public class BlockchainController {
 
-    // not final so they can be mocked...
-    private PrinterUI printer = new PrinterUI();
+    private final PrinterUI printer = new PrinterUI();
     private Blockchain blockchain;
+    private ExecutorService chatClients;
 
     /**
      * entry point invoked by Main after creation of this controller.
      */
     public void run() {
-        ExecutorService chatClients = Executors.newFixedThreadPool(CHAT_CLIENT_COUNT);
+        chatClients = Executors.newFixedThreadPool(CHAT_CLIENT_COUNT);
         try {
             blockchain = Blockchain.getSerializer().deserialize();
             blockchain.resetIfInvalid();
             startChatClients(chatClients);
             continueGeneration(blockchain.size());
             printer.print(blockchain);
-        } catch (InvalidBlockchainException e) {
-            printer.error("%s%n%s".formatted(e.getMessage(), Arrays.toString(e.getStackTrace())));
+        } catch (InvalidBlockchainException exception) {
+            errorExit("Invalid blockchain detected: ", exception);
         }
         chatClients.shutdownNow();
     }
@@ -51,9 +55,26 @@ public class BlockchainController {
      * @param chatClients the thread pool where the ChatClientTask's are submitted to
      */
     private void startChatClients(ExecutorService chatClients) {
+        List <KeyPair> keys = generateKeyPairs();
         for (int i = 0; i < CHAT_CLIENT_COUNT; i++) {
-            chatClients.submit(new ChatClientTask(blockchain, CLIENTS.get(i)));
+            chatClients.submit(new ChatClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
         }
+    }
+
+    private List<KeyPair> generateKeyPairs() {
+        List <KeyPair> keyList = new ArrayList<>(CHAT_CLIENT_COUNT);
+        try {
+            RSAGenerator keyGenerator = new RSAGenerator(RSA_KEY_LENGTH);
+            for (int i = 0; i < CHAT_CLIENT_COUNT; i++) {
+                keyGenerator.createKeys(KEY_PAIRS_PATH_PREFIX + CLIENTS.get(i) + PUBLIC_KEY_SUFFIX,
+                        KEY_PAIRS_PATH_PREFIX + CLIENTS.get(i) + PRIVATE_KEY_SUFFIX);
+                keyList.add(keyGenerator.getKeyPair());
+                log.info("Private/Public keypair generated for chat client " + CLIENTS.get(i));
+            }
+        } catch (NoSuchAlgorithmException | IOException exception) {
+            errorExit("Error RSA-encoding key pair:", exception);
+        }
+        return keyList;
     }
 
     /**
@@ -73,10 +94,10 @@ public class BlockchainController {
                 if (!blockchain.addBlock(miners.invokeAny(getMineTasks(++createdBlocks, leadingHashZeros)))) {
                     throw new InvalidBlockchainException("Invalid block received by miner !");
                 }
-            } catch (Exception e) {
-                log.error("Exception while blockchain creation: " + e.getMessage());
+            } catch (Exception exception) {
                 miners.shutdownNow();
-                Thread.currentThread().interrupt();
+                errorExit("Exception while blockchain creation: ", exception);
+                Thread.currentThread().interrupt(); // to soothe Sonar...
             }
             leadingHashZeros = blockchain.adaptLeadingHashZeros();
         }
@@ -97,5 +118,12 @@ public class BlockchainController {
         MineTask mineTask = new MineTask(new ChatDataBlockFactory(leadingHashZeros, blockchain.pollChat()),
                 id, previousHash);
         return Collections.nCopies(MINER_COUNT, mineTask);
+    }
+
+    private void errorExit(String message, Exception exception) {
+        chatClients.shutdownNow();
+        printer.error(message);
+        exception.printStackTrace();
+        System.exit(1);
     }
 }

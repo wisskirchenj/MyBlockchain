@@ -8,12 +8,12 @@ import java.util.List;
  * created during the creation of the previous block.
  * Instances keep a MagicBlock as a field and "decorate" it with block data - using Decorator pattern.
  */
-public class ChatDataBlock implements DataBlock<List<String>> {
+public class ChatDataBlock implements DataBlock<List<SignedMessage>> {
     @Serial
-    private static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 43L;
 
     private final MagicBlock block;
-    private List<String> data = null;
+    private List<SignedMessage> data = null;
 
     public ChatDataBlock(Block block) {
         this.block = (MagicBlock) block;
@@ -37,7 +37,9 @@ public class ChatDataBlock implements DataBlock<List<String>> {
         if (getData().isEmpty()) {
             return "Block data: no messages\n";
         }
-        return "Block data:%n%s%n".formatted(String.join("\n", getData()));
+        StringBuilder builder = new StringBuilder("Block data:\n");
+        getData().forEach(e -> builder.append(e).append("\n"));
+        return builder.toString();
     }
 
     @Override
@@ -91,12 +93,12 @@ public class ChatDataBlock implements DataBlock<List<String>> {
     }
 
     @Override
-    public List<String> getData() {
+    public List<SignedMessage> getData() {
         return data;
     }
 
     @Override
-    public void setData(List<String> data) {
+    public void setData(List<SignedMessage> data) {
         this.data = data;
     }
 }

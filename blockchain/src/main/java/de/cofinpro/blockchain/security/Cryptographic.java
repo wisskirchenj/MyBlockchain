@@ -1,4 +1,4 @@
-package de.cofinpro.blockchain.controller;
+package de.cofinpro.blockchain.security;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

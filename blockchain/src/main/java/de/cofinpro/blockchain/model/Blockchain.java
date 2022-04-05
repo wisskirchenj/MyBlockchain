@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * our Blockchain class extends from (i.e. is a) LinkedList to be able to iterate it in both directions.
@@ -25,7 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Blockchain extends LinkedList<Block> {
 
     @Serial
-    private static final long serialVersionUID = 11L;
+    private static final long serialVersionUID = 12L;
 
     private static final BlockchainValidator VALIDATOR = new BlockchainValidator();
     private static final BlockchainSerializer SERIALIZER = new BlockchainSerializer();
@@ -37,7 +38,8 @@ public class Blockchain extends LinkedList<Block> {
         return SERIALIZER;
     }
 
-    private transient Queue<String> chatMessageQueue = null;
+    private final AtomicInteger messageIdCount = new AtomicInteger(0);
+    private transient Queue<SignedMessage> chatMessageQueue = null;
     private transient int currentLeadingHashZeros = 0;
 
     /**
@@ -47,7 +49,7 @@ public class Blockchain extends LinkedList<Block> {
      * @return false if block invalid (it is not added in that case), true else
      */
     public boolean addBlock(Block newBlock) {
-        if (!VALIDATOR.isNewBlockValid(this, newBlock, currentLeadingHashZeros)) {
+        if (!VALIDATOR.isBlockValid(newBlock, currentLeadingHashZeros, isEmpty() ? null : getLast())) {
             return false;
         }
         add(newBlock);
@@ -83,15 +85,27 @@ public class Blockchain extends LinkedList<Block> {
     }
 
     /**
+     * provides the chat client with a unique ascending message id.
+     * @return the id incremented counter
+     */
+    public int getMessageId() {
+        return messageIdCount.incrementAndGet();
+    }
+
+    /**
      * message post access point, which is invoked by chat client threads. The queue is concurrent
      * and the invoking frequency is moderate...
      * However, it is safer to synchronize - esp. with pollChat below, which is called by the Controller-thread
      * who drains the queue.
-     * @param message new chat message to offer to the concurrent message queue.
+     * @param signedMessage new chat message to offer to the concurrent message queue.
      */
-    public synchronized void sendChatMessage(String message) {
+    public synchronized void sendChatMessage(SignedMessage signedMessage) {
         if (chatMessageQueue != null) {
-            chatMessageQueue.offer(message);
+            if (VALIDATOR.isMessageValid(signedMessage, getLast())) {
+                chatMessageQueue.offer(signedMessage);
+            } else {
+                log.warn("Invalid digital message <%s> received ".formatted(signedMessage.getMessage()));
+            }
         }
     }
 
@@ -102,8 +116,8 @@ public class Blockchain extends LinkedList<Block> {
      * the queue is created here on first call and synchronization prevents race condition with sender threads.
      * @return the chat messages as list
      */
-    public synchronized List<String> pollChat() {
-        List<String> chatData = new ArrayList<>();
+    public synchronized List<SignedMessage> pollChat() {
+        List<SignedMessage> chatData = new ArrayList<>();
         if (chatMessageQueue == null) {
             chatMessageQueue = new ConcurrentLinkedQueue<>();
         }

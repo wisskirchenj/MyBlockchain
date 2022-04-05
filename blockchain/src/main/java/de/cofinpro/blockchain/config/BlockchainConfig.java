@@ -13,11 +13,17 @@ public class BlockchainConfig {
         // no instantiation
     }
 
-    public static final int BLOCKCHAIN_LENGTH = 15;
+    public static final int BLOCKCHAIN_LENGTH = 6;
+
     public static final String SERIALIZE_PATH = "./blockchain/src/main/resources/data/blockchain.ser";
+    public static final String KEY_PAIRS_PATH_PREFIX = "./blockchain/src/main/resources/data/";
+    public static final String PUBLIC_KEY_SUFFIX = "_rsa.pub";
+    public static final String PRIVATE_KEY_SUFFIX = "_rsa";
+    public static final int RSA_KEY_LENGTH = 1024;
+
     public static final int BLOCK_MIN_CREATION_SECONDS = 1;
     public static final int BLOCK_MAX_CREATION_SECONDS = 5;
-    public static final int MAX_CHAT_PAUSE_MILLISECONDS = 500;
+    public static final int MAX_CHAT_PAUSE_MILLISECONDS = 300;
 
     public static final List<String> CLIENTS = List.of("Peter", "Mary", "Caspar", "Balthazar");
     public static final int CHAT_CLIENT_COUNT = CLIENTS.size();

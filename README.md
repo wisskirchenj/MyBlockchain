@@ -24,3 +24,5 @@ tasks will be included.
 29.03.22 Stage 3 completed, block creation in thread pool with load balancing
 
 02.04.22 Stage 4 completed, asynchronous message queue with posting client threads, chat history stored as block data in blockchain
+
+05.04.22 Stage 5 completed, creating RSA keypair per Chat user, signing and verifying messages, unique id

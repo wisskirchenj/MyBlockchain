@@ -1,8 +1,12 @@
 package de.cofinpro.blockchain.controller;
 
 import de.cofinpro.blockchain.model.Blockchain;
+import de.cofinpro.blockchain.model.SignedMessage;
+import de.cofinpro.blockchain.security.RSASignerAndValidator;
+
 import static de.cofinpro.blockchain.config.BlockchainConfig.*;
 
+import java.security.KeyPair;
 import java.util.Random;
 
 /**
@@ -15,10 +19,12 @@ public class ChatClientTask implements Runnable {
 
     private final Blockchain blockchain;
     private final String name;
+    private final KeyPair keyPair;
 
-    public ChatClientTask(Blockchain blockchain, String threadName) {
+    public ChatClientTask(Blockchain blockchain, String threadName, KeyPair keyPair) {
         this.blockchain = blockchain;
         this.name = threadName;
+        this.keyPair = keyPair;
     }
 
     /**
@@ -30,8 +36,12 @@ public class ChatClientTask implements Runnable {
         try {
             while (!Thread.interrupted()) {
                 Thread.sleep(RANDOM.nextInt(MAX_CHAT_PAUSE_MILLISECONDS));
-                blockchain.sendChatMessage(name + ": " +
+                int messageId = blockchain.getMessageId();
+                String message = String.format("%s [Id %d]: %s", name, messageId,
                         CHAT_MESSAGES.get(RANDOM.nextInt(CHAT_MESSAGES.size()) + 1));
+                SignedMessage signed = new SignedMessage(message, messageId, keyPair.getPublic(),
+                        RSASignerAndValidator.sign(message, keyPair.getPrivate()));
+                blockchain.sendChatMessage(signed);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -1,12 +1,18 @@
 package de.cofinpro.blockchain.model;
 
+import de.cofinpro.blockchain.security.RSASignerAndValidator;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Iterator;
 
 /**
  * validator class, that knows how to validate a complete blockchain - method validateChain(...) as well
  * as to validate a new block before addition to the chain - method isNewBlocValid(...)
  */
+@Slf4j
 public class BlockchainValidator {
+
+    private static final String ERROR = "Invalid Blockchain !";
 
     /**
      * validates the whole blockchain regarding hash validation as well as leading zero validation.
@@ -17,53 +23,59 @@ public class BlockchainValidator {
         if (blockchain.isEmpty()) {
             return;
         }
-        performHashValidation(blockchain);
-        performLeadingZerosValidation(blockchain);
-    }
-
-    /**
-     * performs hash validation on this blockchain by checking, that the previousHash field matches
-     * the hash of the next block.
-     * The method starts with last block and moves to the beginning of the chain.
-     * @param blockchain the chain to validate
-     * @throws InvalidBlockchainException extends RuntimeException if blockchain is invalid.
-     */
-    private void performHashValidation(Blockchain blockchain) throws InvalidBlockchainException {
-        Iterator<Block> iterator = blockchain.descendingIterator();
-        Block block = iterator.next();
-        while (iterator.hasNext()) {
-            Block previousBlock = iterator.next();
-            if (!block.hashMatchesPrevious(previousBlock)) {
-                throw new InvalidBlockchainException("Invalid blockchain!");
+        Iterator<Block> currentIterator = blockchain.descendingIterator();
+        Iterator<Block> previousIterator = blockchain.descendingIterator();
+        Block block = previousIterator.next(); // skip one block
+        while (previousIterator.hasNext()) {
+            block = currentIterator.next();
+            Block previousBlock = previousIterator.next();
+            if (!isBlockValid(block, block.getLeadingHashZeros(), previousBlock)) {
+                throw new InvalidBlockchainException(ERROR);
             }
-                    block = previousBlock;
+            validateBlockMessages(block, previousBlock);
+        }
+        if (!isBlockValid(block, block.getLeadingHashZeros(), null)) {
+            throw new InvalidBlockchainException(ERROR);
         }
     }
-    /**
-     * method, that validates, if the block has at least as many leading hash zeros as required (block field)
-     * @param blockchain the chain to validate
-     * @throws InvalidBlockchainException extends RuntimeException if blockchain is invalid.
-     */
-    private void performLeadingZerosValidation(Blockchain blockchain) throws InvalidBlockchainException {
-        for (Block block : blockchain) {
-            if (!block.getHash().startsWith("0".repeat(block.getLeadingHashZeros()))) {
-                throw new InvalidBlockchainException("Block hash has not the requested leading zeros!");
+
+    private void validateBlockMessages(Block block, Block previousBlock) {
+        if (block instanceof ChatDataBlock chatDataBlock) {
+            ChatDataBlock previous = (ChatDataBlock) previousBlock;
+            if (chatDataBlock.getData().stream()
+                    .anyMatch(signedMessage -> !isMessageValid(signedMessage, previous))) {
+                throw new InvalidBlockchainException(ERROR);
             }
         }
     }
 
     /**
      * validates a new block - is called by blockchain before adding this block to the chain.
-     * @param blockchain the blockchain
-     * @param newBlock the new block to validate
+     * @param block the new block to validate
      * @param leadingHashZeros the requested leading hash zeros
+     * @param previous the previous block in the chain or null if chain was empty
      * @return validation result
      */
-    public boolean isNewBlockValid(Blockchain blockchain, Block newBlock, int leadingHashZeros) {
-        boolean valid = newBlock.getHash().startsWith("0".repeat(leadingHashZeros));
-        if (!blockchain.isEmpty()) {
-            valid &= newBlock.hashMatchesPrevious(blockchain.getLast());
+    public boolean isBlockValid(Block block, int leadingHashZeros, Block previous) {
+        boolean valid = block.getHash().startsWith("0".repeat(leadingHashZeros));
+        if (previous != null) {
+            valid &= block.hashMatchesPrevious(previous);
         }
         return valid;
+    }
+
+    public boolean isMessageValid(SignedMessage signedMessage, Block previous) {
+        if (previous instanceof ChatDataBlock chatDataBlock) {
+            return RSASignerAndValidator.isValid(signedMessage) && messageIdIsValid(signedMessage, chatDataBlock);
+        } else {
+            log.error("Implementation error in BlockChain-Validator: isMessageValid called with wrong block type");
+            throw new InvalidBlockchainException(
+                    "Implementation error - Blockchain-Validator called with wrong block type.");
+        }
+    }
+
+    private boolean messageIdIsValid(SignedMessage signedMessage, ChatDataBlock chatDataBlock) {
+        return chatDataBlock.getData().stream()
+                .noneMatch(chatMessage -> chatMessage.getId() >= signedMessage.getId());
     }
 }

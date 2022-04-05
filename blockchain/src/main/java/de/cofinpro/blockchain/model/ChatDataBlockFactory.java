@@ -7,9 +7,9 @@ import java.util.List;
  */
 public class ChatDataBlockFactory extends MagicBlockFactory {
 
-    private final List<String> chatData;
+    private final List<SignedMessage> chatData;
 
-    public ChatDataBlockFactory(int leadingHashZeros, List<String> chatData) {
+    public ChatDataBlockFactory(int leadingHashZeros, List<SignedMessage> chatData) {
         super(leadingHashZeros);
         this.chatData = chatData;
     }
