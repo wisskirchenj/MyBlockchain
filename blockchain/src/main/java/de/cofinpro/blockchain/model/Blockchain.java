@@ -95,6 +95,8 @@ public class Blockchain extends LinkedList<Block> {
     /**
      * message post access point, which is invoked by chat client threads. The queue is concurrent
      * and the invoking frequency is moderate...
+     * The blockchain validates all incoming signed chat messages - for their signature authenticity as well
+     * as for the validity of the message id given.
      * However, it is safer to synchronize - esp. with pollChat below, which is called by the Controller-thread
      * who drains the queue.
      * @param signedMessage new chat message to offer to the concurrent message queue.

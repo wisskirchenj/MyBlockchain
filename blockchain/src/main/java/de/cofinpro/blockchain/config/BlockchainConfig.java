@@ -13,7 +13,7 @@ public class BlockchainConfig {
         // no instantiation
     }
 
-    public static final int BLOCKCHAIN_LENGTH = 6;
+    public static final int BLOCKCHAIN_LENGTH = 7;
 
     public static final String SERIALIZE_PATH = "./blockchain/src/main/resources/data/blockchain.ser";
     public static final String KEY_PAIRS_PATH_PREFIX = "./blockchain/src/main/resources/data/";

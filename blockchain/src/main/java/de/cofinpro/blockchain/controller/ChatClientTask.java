@@ -11,7 +11,7 @@ import java.util.Random;
 
 /**
  * Runnable implementation, that is performed in the chat clients thread pool.
- * Creates random messages in random time intervals both configured in the BlockchainConfig.
+ * Creates random digitally signed messages in random time intervals both configured in the BlockchainConfig.
  */
 public class ChatClientTask implements Runnable {
 
@@ -28,7 +28,7 @@ public class ChatClientTask implements Runnable {
     }
 
     /**
-     * Loop to create random messages in random time intervals both configured via BlockchainConfig.
+     * Loop to create and sign random messages in random time intervals both configured via BlockchainConfig.
      * Simultaneously listening to interrupt - probably superfluous since thread mostly sleeps.
      */
     @Override

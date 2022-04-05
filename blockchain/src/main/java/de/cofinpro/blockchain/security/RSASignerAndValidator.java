@@ -14,6 +14,12 @@ public class RSASignerAndValidator {
         // prevent instances
     }
 
+    /**
+     * static signing utility method
+     * @param message message to sign
+     * @param privateKey the private key to use
+     * @return the signature as byte array
+     */
     public static byte[] sign(String message, PrivateKey privateKey) {
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");
@@ -25,6 +31,12 @@ public class RSASignerAndValidator {
         }
     }
 
+    /**
+     * method to verify a signed message by a receiver regarding authenticity,
+     * The SignedMessage object contains everything to do that (message, public key and signature).
+     * @param signedMessage message to sign
+     * @return the verification result.
+     */
     public static boolean isValid(SignedMessage signedMessage) {
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");

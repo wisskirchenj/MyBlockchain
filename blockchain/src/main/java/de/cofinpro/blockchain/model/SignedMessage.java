@@ -29,6 +29,11 @@ public class SignedMessage implements Serializable {
         this.signed = signed;
     }
 
+    /**
+     * String representation is just the message string (it contains the is already) and signed
+     * bytes plus key are kept out
+     * @return string representation of Signed Message
+     */
     @Override
     public String toString() {
         return message;

@@ -39,6 +39,14 @@ public class BlockchainValidator {
         }
     }
 
+    /**
+     * validate all messages of a block regarding signature authenticity as well as validity of message
+     * id. It is invoked during the total check of a blockchain after deserialization.
+     * Calls isMessageValid() to perform result
+     * @param block the block whose messages are to be validated
+     * @param previousBlock the previous block for validating ascending message ids
+     * @throws InvalidBlockchainException if validation fails
+     */
     private void validateBlockMessages(Block block, Block previousBlock) {
         if (block instanceof ChatDataBlock chatDataBlock) {
             ChatDataBlock previous = (ChatDataBlock) previousBlock;
@@ -64,6 +72,13 @@ public class BlockchainValidator {
         return valid;
     }
 
+    /**
+     * validates a signed message  regarding signature authenticity as well as validity of message
+     * id - sub call to messageIdIsValid().
+     * @param signedMessage the signed message to be validated
+     * @param previous the previous block for validating ascending message ids
+     * @throws InvalidBlockchainException only if block instance is of unexpected type. (not if validation fails!)
+     */
     public boolean isMessageValid(SignedMessage signedMessage, Block previous) {
         if (previous instanceof ChatDataBlock chatDataBlock) {
             return RSASignerAndValidator.isValid(signedMessage) && messageIdIsValid(signedMessage, chatDataBlock);
@@ -74,6 +89,11 @@ public class BlockchainValidator {
         }
     }
 
+    /**
+     * validates a messageId, i.e. checks whether it is bigger than all the id's of the previous block.
+     * @param signedMessage the signed message to be validated
+     * @param chatDataBlock the previous block for validating ascending message ids
+     */
     private boolean messageIdIsValid(SignedMessage signedMessage, ChatDataBlock chatDataBlock) {
         return chatDataBlock.getData().stream()
                 .noneMatch(chatMessage -> chatMessage.getId() >= signedMessage.getId());

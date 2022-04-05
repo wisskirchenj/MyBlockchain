@@ -49,9 +49,9 @@ public class BlockchainController {
     }
 
     /**
-     * start all chat clients before the blockchain generation starts. They will produce chat messages
-     * during all subsequent program run. The chat clients thread pool is stopped at the end of the run() method
-     * calling this method.
+     * start all chat clients before the blockchain generation starts. They will produce and digitally sign
+     * chat messages during all subsequent program run. The chat clients thread pool is stopped at the end
+     * of the run() method, that calls this method.
      * @param chatClients the thread pool where the ChatClientTask's are submitted to
      */
     private void startChatClients(ExecutorService chatClients) {
@@ -61,6 +61,10 @@ public class BlockchainController {
         }
     }
 
+    /**
+     * generate the RSA key pairs for all chat users.
+     * @return list of key pairs
+     */
     private List<KeyPair> generateKeyPairs() {
         List <KeyPair> keyList = new ArrayList<>(CHAT_CLIENT_COUNT);
         try {
@@ -120,6 +124,11 @@ public class BlockchainController {
         return Collections.nCopies(MINER_COUNT, mineTask);
     }
 
+    /**
+     * shut down chat, print error message and stack trace and leave.
+     * @param message error message
+     * @param exception exception that brought us here
+     */
     private void errorExit(String message, Exception exception) {
         chatClients.shutdownNow();
         printer.error(message);

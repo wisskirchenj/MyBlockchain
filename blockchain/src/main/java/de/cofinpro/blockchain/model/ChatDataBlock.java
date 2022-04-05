@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.util.List;
 
 /**
- * concrete chat implementation of a DataBlock with data type List<String> to store chat messages
+ * concrete chat implementation of a DataBlock with data type List<? extends Serializable> to store chat messages
  * created during the creation of the previous block.
  * Instances keep a MagicBlock as a field and "decorate" it with block data - using Decorator pattern.
  */
