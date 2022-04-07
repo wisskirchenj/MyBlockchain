@@ -6,7 +6,7 @@ Purpose of doing this project, is getting familiar with the fascinating and more
 blockchain stuff. Moreover generic programming, streaming, multithreading, hashing and crytography 
 topics are investigated.
 
-[//]: # (Project was completed on xx.0d.22.)
+Project was completed on 07.04.22.
 
 ## Repository Contents
 
@@ -26,3 +26,5 @@ tasks will be included.
 02.04.22 Stage 4 completed, asynchronous message queue with posting client threads, chat history stored as block data in blockchain
 
 05.04.22 Stage 5 completed, creating RSA keypair per Chat user, signing and verifying messages, unique id
+
+06.04.22 Stage 6 completed, blockchain can now run in transaction, bitcoin mode OR chat mode.

@@ -99,6 +99,7 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
      * creates special empty message or joins the chat messages.
      * @return string representation of the chat block data
      */
+    @Override
     public String getDataString() {
         if (getData().isEmpty()) {
             return BLOCKCHAIN_MODE == BlockchainConfig.Mode.CHAT ?
@@ -117,6 +118,17 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
      */
     @Override
     public String toString() {
-        return block.getBlockStateString() + getDataString() + block.getGeneratingString();
+        return getBlockStateString() + getDataString() + block.getGeneratingString();
+    }
+
+    private String getBlockStateString() {
+        if (BLOCKCHAIN_MODE == BlockchainConfig.Mode.CHAT) {
+            return block.getBlockStateString();
+        }
+        return String.format("Block:%nCreated by miner%d%nminer%d gets 100 VC %nId: %d%n" +
+                        "Timestamp: %d%nMagic number: %d%n" +
+                        "Hash of the previous block:%n%s%nHash of the block:%n%s%n"
+                ,block.getMinerId(), block.getMinerId(), block.getId(), block.getTimestamp(),
+                block.getMagicNumber(), block.getPreviousHash(), block.getHash());
     }
 }

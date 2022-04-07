@@ -4,9 +4,9 @@ import de.cofinpro.blockchain.model.core.Blockchain;
 import de.cofinpro.blockchain.model.signed.SignedMessage;
 import de.cofinpro.blockchain.security.RSASignerAndValidator;
 
-import static de.cofinpro.blockchain.config.BlockchainConfig.*;
-
 import java.security.KeyPair;
+
+import static de.cofinpro.blockchain.config.BlockchainConfig.*;
 
 /**
  * Runnable implementation, that is performed in the chat clients thread pool.

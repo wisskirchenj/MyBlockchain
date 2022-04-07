@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.security.PublicKey;
 
 /**
- * Immutable Data object for storage as data block in the blockchain. It represents an authenticated (i.e digitally
+ * Immutable Data object for storage as data block in the blockchain. It represents an authenticated (i.e. digitally
  * signed) message, which is accessible as string field, as well as the public key for receiver verification and
  * the signed message. Further a unique id is provided - to prevent copying the message again to the blockchain.
  */

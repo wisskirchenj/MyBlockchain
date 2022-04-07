@@ -11,7 +11,7 @@ public class BlockchainConfig {
         // no instantiation
     }
 
-    public static final int BLOCKCHAIN_LENGTH = 17;
+    public static final int BLOCKCHAIN_LENGTH = 7;
 
     public enum Mode  {
         CHAT, TRANSACTIONS
@@ -29,7 +29,7 @@ public class BlockchainConfig {
 
     public static final int BLOCK_MIN_CREATION_SECONDS = 1;
     public static final int BLOCK_MAX_CREATION_SECONDS = 3;
-    public static final int MAX_CLIENT_PAUSE_MILLISECONDS = 500;
+    public static final int MAX_CLIENT_PAUSE_MILLISECONDS = 300;
 
     public static final List<String> CLIENTS = List.of("Peter", "Mary", "Caspar", "Balthazar");
     public static final int CLIENT_COUNT = CLIENTS.size();

@@ -63,7 +63,6 @@ public class Blockchain extends LinkedList<Block> {
         return true;
     }
 
-
     /**
      * validates and adds a new block (as typically received by a miner). Also, a serialization of the
      * extended chain is done to avoid data loss.

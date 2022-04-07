@@ -46,7 +46,7 @@ public class TransactionClientTask extends ClientTask {
      * The amount is generated in a way, that it intentionally may exceed the balance (1.02 * possible amount) in rare
      * cases.
      * @param senderBalance the balance of the sender
-     * @return the random amount - whihc may be slightly to high.
+     * @return the random amount - which may be slightly too high.
      */
     private int findRandomAmount(int senderBalance) {
         int amount = RANDOM.nextInt((int) (senderBalance * 1.02));
@@ -54,7 +54,7 @@ public class TransactionClientTask extends ClientTask {
     }
 
     /**
-     * randomly finds a money receiver deifferent form the sender given. While the sender is randomly chosen only
+     * randomly finds a money receiver different form the sender given. While the sender is randomly chosen only
      * among the participants who have a positive account balance in the blockchain's ledger, the receiver is chosen
      * over all miners and clients.
      * @param sender the money sender previously chosen

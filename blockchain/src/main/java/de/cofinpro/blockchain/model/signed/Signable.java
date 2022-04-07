@@ -5,7 +5,7 @@ import java.security.PublicKey;
 
 /**
  * implementing classes provide a data object together with a digital signature, that is applied to the object's
- * toString() representation, and a public ckey for receiver verification.
+ * toString() representation, and a public key for receiver verification.
  */
 public interface Signable extends Serializable {
 
