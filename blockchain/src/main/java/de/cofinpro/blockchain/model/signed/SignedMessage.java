@@ -1,9 +1,9 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.signed;
 
+import de.cofinpro.blockchain.model.signed.Signable;
 import lombok.Getter;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.security.PublicKey;
 
 /**
@@ -12,7 +12,7 @@ import java.security.PublicKey;
  * the signed message. Further a unique id is provided - to prevent copying the message again to the blockchain.
  */
 @Getter
-public class SignedMessage implements Serializable {
+public class SignedMessage implements Signable {
 
     @Serial
     private static final long serialVersionUID = 50L;

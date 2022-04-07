@@ -1,5 +1,7 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.magic;
 
+import de.cofinpro.blockchain.model.core.Block;
+import de.cofinpro.blockchain.model.core.BlockFactory;
 import de.cofinpro.blockchain.security.Cryptographic;
 
 import java.security.NoSuchAlgorithmException;

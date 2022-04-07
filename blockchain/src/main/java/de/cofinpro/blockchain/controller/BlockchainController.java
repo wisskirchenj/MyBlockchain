@@ -1,6 +1,8 @@
 package de.cofinpro.blockchain.controller;
 
-import de.cofinpro.blockchain.model.*;
+import de.cofinpro.blockchain.model.core.*;
+import de.cofinpro.blockchain.model.signed.DataBlockFactory;
+import de.cofinpro.blockchain.model.signed.SignedDataBlock;
 import de.cofinpro.blockchain.security.RSAGenerator;
 import de.cofinpro.blockchain.view.PrinterUI;
 import lombok.extern.slf4j.Slf4j;
@@ -29,35 +31,39 @@ public class BlockchainController {
 
     private final PrinterUI printer = new PrinterUI();
     private Blockchain blockchain;
-    private ExecutorService chatClients;
+    private ExecutorService clients;
 
     /**
      * entry point invoked by Main after creation of this controller.
      */
     public void run() {
-        chatClients = Executors.newFixedThreadPool(CHAT_CLIENT_COUNT);
+        clients = Executors.newFixedThreadPool(CLIENT_COUNT);
         try {
             blockchain = Blockchain.getSerializer().deserialize();
             blockchain.resetIfInvalid();
-            startChatClients(chatClients);
+            startClients(clients);
             continueGeneration(blockchain.size());
             printer.print(blockchain);
         } catch (InvalidBlockchainException exception) {
             errorExit("Invalid blockchain detected: ", exception);
         }
-        chatClients.shutdownNow();
+        clients.shutdownNow();
     }
 
     /**
      * start all chat clients before the blockchain generation starts. They will produce and digitally sign
      * chat messages during all subsequent program run. The chat clients thread pool is stopped at the end
      * of the run() method, that calls this method.
-     * @param chatClients the thread pool where the ChatClientTask's are submitted to
+     * @param clients the thread pool where the ChatClientTask's are submitted to
      */
-    private void startChatClients(ExecutorService chatClients) {
+    private void startClients(ExecutorService clients) {
         List <KeyPair> keys = generateKeyPairs();
-        for (int i = 0; i < CHAT_CLIENT_COUNT; i++) {
-            chatClients.submit(new ChatClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
+        for (int i = 0; i < CLIENT_COUNT; i++) {
+            if (BLOCKCHAIN_MODE == Mode.CHAT) {
+                clients.submit(new ChatClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
+            } else if (BLOCKCHAIN_MODE == Mode.TRANSACTIONS) {
+                clients.submit(new TransactionClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
+            }
         }
     }
 
@@ -66,10 +72,10 @@ public class BlockchainController {
      * @return list of key pairs
      */
     private List<KeyPair> generateKeyPairs() {
-        List <KeyPair> keyList = new ArrayList<>(CHAT_CLIENT_COUNT);
+        List <KeyPair> keyList = new ArrayList<>(CLIENT_COUNT);
         try {
             RSAGenerator keyGenerator = new RSAGenerator(RSA_KEY_LENGTH);
-            for (int i = 0; i < CHAT_CLIENT_COUNT; i++) {
+            for (int i = 0; i < CLIENT_COUNT; i++) {
                 keyGenerator.createKeys(KEY_PAIRS_PATH_PREFIX + CLIENTS.get(i) + PUBLIC_KEY_SUFFIX,
                         KEY_PAIRS_PATH_PREFIX + CLIENTS.get(i) + PRIVATE_KEY_SUFFIX);
                 keyList.add(keyGenerator.getKeyPair());
@@ -95,7 +101,7 @@ public class BlockchainController {
         ExecutorService miners = Executors.newFixedThreadPool(MINER_COUNT);
         while (createdBlocks < BLOCKCHAIN_LENGTH) {
             try {
-                if (!blockchain.addBlock(miners.invokeAny(getMineTasks(++createdBlocks, leadingHashZeros)))) {
+                if (!blockchain.addDataBlock(miners.invokeAny(getMineTasks(++createdBlocks, leadingHashZeros)))) {
                     throw new InvalidBlockchainException("Invalid block received by miner !");
                 }
             } catch (Exception exception) {
@@ -117,9 +123,9 @@ public class BlockchainController {
      * @param leadingHashZeros requested leading zeros for the hash of new block
      * @return List of mine tasks for creating a new block
      */
-    private List<Callable<Block>> getMineTasks(int id, int leadingHashZeros) {
+    private List<Callable<SignedDataBlock>> getMineTasks(int id, int leadingHashZeros) {
         String previousHash = blockchain.isEmpty() ? "0" : blockchain.getLast().getHash();
-        MineTask mineTask = new MineTask(new ChatDataBlockFactory(leadingHashZeros, blockchain.pollChat()),
+        MineTask mineTask = new MineTask(new DataBlockFactory<>(leadingHashZeros, blockchain.pollData()),
                 id, previousHash);
         return Collections.nCopies(MINER_COUNT, mineTask);
     }
@@ -130,7 +136,7 @@ public class BlockchainController {
      * @param exception exception that brought us here
      */
     private void errorExit(String message, Exception exception) {
-        chatClients.shutdownNow();
+        clients.shutdownNow();
         printer.error(message);
         exception.printStackTrace();
         System.exit(1);

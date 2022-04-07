@@ -1,21 +1,23 @@
 package de.cofinpro.blockchain.controller;
 
-import de.cofinpro.blockchain.model.Block;
-import de.cofinpro.blockchain.model.ChatDataBlockFactory;
+import de.cofinpro.blockchain.model.signed.DataBlockFactory;
+import de.cofinpro.blockchain.model.signed.Signable;
+import de.cofinpro.blockchain.model.signed.SignedDataBlock;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
  * Callable implementation, that is started in the thread pool (ExecutorService implementation).
  * A Callable<Block> is a functional interface with method signature 'Block call();'.
  */
-public class MineTask implements Callable<Block> {
+public class MineTask implements Callable<SignedDataBlock> {
 
     private final int id;
     private final String previousHash;
-    private final ChatDataBlockFactory blockFactory;
+    private final DataBlockFactory<List<Signable>> blockFactory;
 
-    public MineTask(ChatDataBlockFactory blockFactory, int id, String previousHash) {
+    public MineTask(DataBlockFactory<List<Signable>> blockFactory, int id, String previousHash) {
         this.blockFactory = blockFactory;
         this.id = id;
         this.previousHash = previousHash;
@@ -27,10 +29,7 @@ public class MineTask implements Callable<Block> {
      * @throws Exception if unable to compute a result
      */
     @Override
-    public Block call() throws Exception {
-        Block block = blockFactory.createBlock(id, previousHash);
-        String threadName = Thread.currentThread().getName();
-        block.setMinerId(Integer.parseInt(threadName.substring(threadName.lastIndexOf('-') + 1)));
-        return block;
+    public SignedDataBlock call() throws Exception {
+        return blockFactory.createBlock(id, previousHash);
     }
 }

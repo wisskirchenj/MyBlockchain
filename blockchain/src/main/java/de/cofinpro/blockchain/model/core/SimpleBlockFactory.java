@@ -1,4 +1,4 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.core;
 
 import de.cofinpro.blockchain.security.Cryptographic;
 

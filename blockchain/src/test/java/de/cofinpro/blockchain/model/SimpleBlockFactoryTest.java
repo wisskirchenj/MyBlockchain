@@ -1,5 +1,8 @@
 package de.cofinpro.blockchain.model;
 
+import de.cofinpro.blockchain.model.core.Block;
+import de.cofinpro.blockchain.model.core.SimpleBlock;
+import de.cofinpro.blockchain.model.core.SimpleBlockFactory;
 import de.cofinpro.blockchain.security.Cryptographic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

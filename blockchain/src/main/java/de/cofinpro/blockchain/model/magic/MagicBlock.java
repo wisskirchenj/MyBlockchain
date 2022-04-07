@@ -1,5 +1,6 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.magic;
 
+import de.cofinpro.blockchain.model.core.Block;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,6 @@ import java.util.Date;
 public class MagicBlock implements Block {
     @Serial
     private static final long serialVersionUID = 35L;
-
 
     private long id;
     private long timestamp;
@@ -43,13 +43,13 @@ public class MagicBlock implements Block {
         return getBlockStateString() + getGeneratingString();
     }
 
-    protected String getBlockStateString() {
+    public String getBlockStateString() {
         return ("Block:%nCreated by miner # %d%nId: %d%nTimestamp: %d%nMagic number: %d%n" +
                 "Hash of the previous block:%n%s%nHash of the block:%n%s%n")
                 .formatted(minerId, id, timestamp, magicNumber, previousHash, hash);
     }
 
-    protected String getGeneratingString() {
+    public String getGeneratingString() {
         return "Block was generating for %d seconds%n".formatted(elapsedTimeInSeconds);
     }
 }

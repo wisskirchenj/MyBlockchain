@@ -1,6 +1,6 @@
 package de.cofinpro.blockchain.security;
 
-import de.cofinpro.blockchain.model.SignedMessage;
+import de.cofinpro.blockchain.model.signed.Signable;
 
 import java.security.*;
 
@@ -33,16 +33,17 @@ public class RSASignerAndValidator {
 
     /**
      * method to verify a signed message by a receiver regarding authenticity,
-     * The SignedMessage object contains everything to do that (message, public key and signature).
-     * @param signedMessage message to sign
+     * The Signable object contains everything to do that (message that was siigned - given by toString(),
+     * public key and signature).
+     * @param signable message to sign
      * @return the verification result.
      */
-    public static boolean isValid(SignedMessage signedMessage) {
+    public static boolean isValid(Signable signable) {
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");
-            signature.initVerify(signedMessage.getPublicKey());
-            signature.update(signedMessage.getMessage().getBytes());
-            return signature.verify(signedMessage.getSigned());
+            signature.initVerify(signable.getPublicKey());
+            signature.update(signable.toString().getBytes());
+            return signature.verify(signable.getSigned());
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new BlockChainSecurityException("Exception signing chat message: " + e.getMessage());
         }

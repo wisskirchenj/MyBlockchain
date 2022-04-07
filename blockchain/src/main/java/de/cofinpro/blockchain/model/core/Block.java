@@ -1,4 +1,4 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.core;
 
 import java.io.Serializable;
 
@@ -44,8 +44,10 @@ public interface Block extends Serializable {
     int getLeadingHashZeros();
 
     /**
-     * @param minerId creator id of the miner who produced this block
+     * @return minerId creator id of the miner who produced this block
      */
+    int getMinerId();
+
     void setMinerId(int minerId);
 
     void setHash(String hash);

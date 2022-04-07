@@ -1,4 +1,4 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.core;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -17,18 +17,8 @@ public abstract class BlockFactory {
      */
     public Block createBlock(int id, String previousHash) throws NoSuchAlgorithmException {
         Block block = newBlockInstance(id, previousHash);
-        setBlockData(block);
         setHashRelatedFields(block);
         return block;
-    }
-
-    /**
-     * method to be overridden by data carrying block types - the block data are provided by the concrete factory.
-     * dummy default implementation for blocks not carrying any data.
-     * @param block newly created block instance
-     */
-    protected void setBlockData(Block block) {
-        // do nothing
     }
 
     /**

@@ -1,15 +1,19 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.core;
 
 import de.cofinpro.blockchain.config.BlockchainConfig;
+import de.cofinpro.blockchain.model.signed.SignedMessage;
+import de.cofinpro.blockchain.model.signed.Signable;
+import de.cofinpro.blockchain.model.signed.SignedDataBlock;
+import de.cofinpro.blockchain.model.signed.SignedTransaction;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static de.cofinpro.blockchain.config.BlockchainConfig.*;
 
 /**
  * our Blockchain class extends from (i.e. is a) LinkedList to be able to iterate it in both directions.
@@ -18,15 +22,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Beside chaining and validating blocks, the blockchain class regulates the computation time for the
  * next block by adapting a complexity in terms of leadingHashZeros for the upcoming block.
  *
- * Further it keeps a concurrent message queue for chat messages, which are stored as block data
+ * Further it keeps a concurrent message queue for signable (from stage 5 on) data, which are stored as block data
  * and offers methods to accept and poll data.
- * (would be better to single messages out of this class, but it's strictly specified by hyperskill...)
+ * (would be better to single data storage handling out of this class, but it's strictly specified by hyperskill...)
  */
 @Slf4j
 public class Blockchain extends LinkedList<Block> {
 
     @Serial
-    private static final long serialVersionUID = 12L;
+    private static final long serialVersionUID = 14L;
 
     private static final BlockchainValidator VALIDATOR = new BlockchainValidator();
     private static final BlockchainSerializer SERIALIZER = new BlockchainSerializer();
@@ -39,8 +43,26 @@ public class Blockchain extends LinkedList<Block> {
     }
 
     private final AtomicInteger messageIdCount = new AtomicInteger(0);
-    private transient Queue<SignedMessage> chatMessageQueue = null;
+    private final Map<String, Integer> ledger = new ConcurrentHashMap<>();
+
+    private transient Queue<Signable> clientDataQueue = null;
     private transient int currentLeadingHashZeros = 0;
+
+    /**
+     * entry point to store non data carrying blocks to a chain - currently not used.
+     * @param newBlock the received block
+     * @return false if block invalid (it is not added in that case), true else
+     */
+    public boolean addBlock(Block newBlock) {
+        if (!VALIDATOR.isBlockValid(newBlock, currentLeadingHashZeros,
+                isEmpty() ? null : getLast())) {
+            return false;
+        }
+        add(newBlock);
+        SERIALIZER.serialize(this);
+        return true;
+    }
+
 
     /**
      * validates and adds a new block (as typically received by a miner). Also, a serialization of the
@@ -48,13 +70,22 @@ public class Blockchain extends LinkedList<Block> {
      * @param newBlock the received block
      * @return false if block invalid (it is not added in that case), true else
      */
-    public boolean addBlock(Block newBlock) {
-        if (!VALIDATOR.isBlockValid(newBlock, currentLeadingHashZeros, isEmpty() ? null : getLast())) {
+    public boolean addDataBlock(SignedDataBlock newBlock) {
+        if (!VALIDATOR.isBlockValid(newBlock, currentLeadingHashZeros,
+                isEmpty() ? null : getLast())) {
             return false;
+        }
+        if (BLOCKCHAIN_MODE == Mode.TRANSACTIONS) {
+            addToLedger(newBlock.getMinerId());
         }
         add(newBlock);
         SERIALIZER.serialize(this);
         return true;
+    }
+
+    private synchronized void addToLedger(int minerId) {
+        String miner = "miner%d".formatted(minerId);
+        ledger.put(miner, ledger.getOrDefault(miner, 0) + BLOCK_REWARD);
     }
 
     /**
@@ -85,7 +116,7 @@ public class Blockchain extends LinkedList<Block> {
     }
 
     /**
-     * provides the chat client with a unique ascending message id.
+     * provides the chat client with a unique ascending message id (Atomic integer).
      * @return the id incremented counter
      */
     public int getMessageId() {
@@ -93,7 +124,7 @@ public class Blockchain extends LinkedList<Block> {
     }
 
     /**
-     * message post access point, which is invoked by chat client threads. The queue is concurrent
+     * message receive access point, which is invoked by chat client threads. The queue is concurrent
      * and the invoking frequency is moderate...
      * The blockchain validates all incoming signed chat messages - for their signature authenticity as well
      * as for the validity of the message id given.
@@ -101,12 +132,12 @@ public class Blockchain extends LinkedList<Block> {
      * who drains the queue.
      * @param signedMessage new chat message to offer to the concurrent message queue.
      */
-    public synchronized void sendChatMessage(SignedMessage signedMessage) {
-        if (chatMessageQueue != null) {
-            if (VALIDATOR.isMessageValid(signedMessage, getLast())) {
-                chatMessageQueue.offer(signedMessage);
+    public synchronized void offerChatMessage(SignedMessage signedMessage) {
+        if (clientDataQueue != null) {
+            if (VALIDATOR.isDataValid(this, signedMessage, (SignedDataBlock) getLast())) {
+                clientDataQueue.offer(signedMessage);
             } else {
-                log.warn("Invalid digital message <%s> received ".formatted(signedMessage.getMessage()));
+                log.warn("Invalid digital message <%s> received ".formatted(signedMessage.toString()));
             }
         }
     }
@@ -118,15 +149,46 @@ public class Blockchain extends LinkedList<Block> {
      * the queue is created here on first call and synchronization prevents race condition with sender threads.
      * @return the chat messages as list
      */
-    public synchronized List<SignedMessage> pollChat() {
-        List<SignedMessage> chatData = new ArrayList<>();
-        if (chatMessageQueue == null) {
-            chatMessageQueue = new ConcurrentLinkedQueue<>();
+    public synchronized List<Signable> pollData() {
+        List<Signable> chatData = new ArrayList<>();
+        if (clientDataQueue == null) {
+            clientDataQueue = new ConcurrentLinkedQueue<>();
         }
-        while (!chatMessageQueue.isEmpty()) {
-            chatData.add(chatMessageQueue.poll());
+        while (!clientDataQueue.isEmpty()) {
+            chatData.add(clientDataQueue.poll());
         }
         return chatData;
+    }
+
+    /**
+     * getter for the blockchain's internal ledger, in case the blockchain "runs on transaction mode"
+     * @return the ledger as <name , balance> HashMap
+     */
+    public Map<String, Integer> getLedger() {
+        return ledger;
+    }
+
+    /**
+     * transaction receive access point, which is invoked by chat client threads. The ledger hash map is concurrent
+     * and the invoking frequency is moderate...
+     * The blockchain validates all incoming signed transactions - for their signature authenticity as well
+     * as for the sender's balance situation allowing the transaction.
+     * Synchronization on the ledger is needed, as we don't want several client threads to check and update the ledger
+     * simultaneously...
+     * @param transaction new transaction to offer to the concurrent ledger map.
+     */
+    public synchronized void offerTransaction(SignedTransaction transaction) {
+        if (clientDataQueue == null) {
+            clientDataQueue = new ConcurrentLinkedQueue<>();
+        }
+        if (VALIDATOR.isDataValid(this, transaction, (SignedDataBlock) getLast())) {
+            clientDataQueue.offer(transaction);
+            ledger.put(transaction.getSender(), ledger.get(transaction.getSender()) - transaction.getAmount());
+            ledger.put(transaction.getReceiver(),
+                    ledger.getOrDefault(transaction.getReceiver(), 0) + transaction.getAmount());
+        } else {
+            log.warn("Invalid digital transaction <%s> received ".formatted(transaction.toString()));
+        }
     }
 
     /**

@@ -1,4 +1,4 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.core;
 
 /**
  * whenever an invalid blockchain is detected (e.g. a deserialized blockchain is invalid),

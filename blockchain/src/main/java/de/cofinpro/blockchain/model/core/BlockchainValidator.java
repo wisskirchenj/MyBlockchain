@@ -1,9 +1,11 @@
-package de.cofinpro.blockchain.model;
+package de.cofinpro.blockchain.model.core;
 
+import de.cofinpro.blockchain.model.signed.*;
 import de.cofinpro.blockchain.security.RSASignerAndValidator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * validator class, that knows how to validate a complete blockchain - method validateChain(...) as well
@@ -32,7 +34,7 @@ public class BlockchainValidator {
             if (!isBlockValid(block, block.getLeadingHashZeros(), previousBlock)) {
                 throw new InvalidBlockchainException(ERROR);
             }
-            validateBlockMessages(block, previousBlock);
+            validateBlockData(blockchain, block, previousBlock);
         }
         if (!isBlockValid(block, block.getLeadingHashZeros(), null)) {
             throw new InvalidBlockchainException(ERROR);
@@ -40,21 +42,29 @@ public class BlockchainValidator {
     }
 
     /**
-     * validate all messages of a block regarding signature authenticity as well as validity of message
-     * id. It is invoked during the total check of a blockchain after deserialization.
-     * Calls isMessageValid() to perform result
+     * validate all the block data regarding signature authenticity as well as validity of their
+     * data objects (message id for chat). The method is invoked during the total check of a blockchain
+     * after deserialization.
+     * @param blockchain the blockchain
      * @param block the block whose messages are to be validated
      * @param previousBlock the previous block for validating ascending message ids
      * @throws InvalidBlockchainException if validation fails
      */
-    private void validateBlockMessages(Block block, Block previousBlock) {
-        if (block instanceof ChatDataBlock chatDataBlock) {
-            ChatDataBlock previous = (ChatDataBlock) previousBlock;
-            if (chatDataBlock.getData().stream()
-                    .anyMatch(signedMessage -> !isMessageValid(signedMessage, previous))) {
+    private void validateBlockData(Blockchain blockchain, Block block, Block previousBlock) {
+        if (block instanceof SignedDataBlock dataBlock) {
+            SignedDataBlock previous = (SignedDataBlock) previousBlock;
+            if (dataBlock.getData().stream()
+                    .anyMatch(signable -> !isDataValidInitial(blockchain, signable, previous))) {
                 throw new InvalidBlockchainException(ERROR);
             }
         }
+    }
+
+    private boolean isDataValidInitial(Blockchain blockchain, Signable signable, SignedDataBlock previous) {
+        if (signable instanceof SignedTransaction) {
+            return RSASignerAndValidator.isValid(signable);
+        }
+        return isDataValid(blockchain, signable, previous);
     }
 
     /**
@@ -75,13 +85,18 @@ public class BlockchainValidator {
     /**
      * validates a signed message  regarding signature authenticity as well as validity of message
      * id - sub call to messageIdIsValid().
-     * @param signedMessage the signed message to be validated
+     * @param signable the signed message to be validated
      * @param previous the previous block for validating ascending message ids
      * @throws InvalidBlockchainException only if block instance is of unexpected type. (not if validation fails!)
      */
-    public boolean isMessageValid(SignedMessage signedMessage, Block previous) {
-        if (previous instanceof ChatDataBlock chatDataBlock) {
-            return RSASignerAndValidator.isValid(signedMessage) && messageIdIsValid(signedMessage, chatDataBlock);
+    public boolean isDataValid(Blockchain blockchain, Signable signable, SignedDataBlock previous) {
+        if (signable instanceof SignedMessage signedMessage) {
+            return RSASignerAndValidator.isValid(signedMessage)
+                    && messageIdIsValid(signedMessage, previous);
+
+        } else if (signable instanceof SignedTransaction signedTransaction) {
+            return RSASignerAndValidator.isValid(signable)
+                    && transactionIsValid(signedTransaction, blockchain.getLedger());
         } else {
             log.error("Implementation error in BlockChain-Validator: isMessageValid called with wrong block type");
             throw new InvalidBlockchainException(
@@ -90,12 +105,22 @@ public class BlockchainValidator {
     }
 
     /**
+     * checks, if the sender has a sufficient balance for the offered transaction
+     * @param transaction the transaction data
+     * @param ledger the blockchain's ledger
+     * @return the validity check result
+     */
+    private boolean transactionIsValid(SignedTransaction transaction, Map<String, Integer> ledger ) {
+        return ledger.getOrDefault(transaction.getSender(), 0) >= transaction.getAmount();
+    }
+
+    /**
      * validates a messageId, i.e. checks whether it is bigger than all the id's of the previous block.
      * @param signedMessage the signed message to be validated
      * @param chatDataBlock the previous block for validating ascending message ids
      */
-    private boolean messageIdIsValid(SignedMessage signedMessage, ChatDataBlock chatDataBlock) {
+    private boolean messageIdIsValid(SignedMessage signedMessage, SignedDataBlock chatDataBlock) {
         return chatDataBlock.getData().stream()
-                .noneMatch(chatMessage -> chatMessage.getId() >= signedMessage.getId());
+                .noneMatch(chatMessage -> ((SignedMessage)chatMessage).getId() >= signedMessage.getId());
     }
 }
