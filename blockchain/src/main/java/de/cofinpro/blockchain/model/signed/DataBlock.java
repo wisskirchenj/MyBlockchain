@@ -110,7 +110,6 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
         return builder.toString();
     }
 
-
     /**
      * message output as desired by project specification (stage 4).
      * Uses protected messages of MagicBlock plus data specific output

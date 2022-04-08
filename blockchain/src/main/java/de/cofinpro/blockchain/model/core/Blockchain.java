@@ -78,6 +78,7 @@ public class Blockchain extends LinkedList<Block> {
             addToLedger(newBlock.getMinerId());
         }
         add(newBlock);
+        log.info("******** New Block created *******\n" + newBlock);
         SERIALIZER.serialize(this);
         return true;
     }
@@ -149,14 +150,14 @@ public class Blockchain extends LinkedList<Block> {
      * @return the chat messages as list
      */
     public synchronized List<Signable> pollData() {
-        List<Signable> chatData = new ArrayList<>();
+        List<Signable> data = new ArrayList<>();
         if (clientDataQueue == null) {
             clientDataQueue = new ConcurrentLinkedQueue<>();
         }
         while (!clientDataQueue.isEmpty()) {
-            chatData.add(clientDataQueue.poll());
+            data.add(clientDataQueue.poll());
         }
-        return chatData;
+        return data;
     }
 
     /**
