@@ -3,7 +3,8 @@ package de.cofinpro.blockchain.config;
 import java.util.List;
 
 /**
- * class that collects configuration constants, chat messages etc..
+ * class that collects configuration constants, chat messages etc.
+ * of course would be nicer to read property json / yaml ... -> maybe some day
  */
 public class BlockchainConfig {
 
@@ -11,29 +12,72 @@ public class BlockchainConfig {
         // no instantiation
     }
 
-    public static final int BLOCKCHAIN_LENGTH = 10;
+    /**
+     * creation stops after this length constant is reached
+     */
+    public static final int BLOCKCHAIN_LENGTH = 8;
 
+    /**
+     * setting of Mode defines, if blockchain encrypts chat messages or VC transactions,
+     * VC being our virtual coins (as bitcoins).
+     */
     public enum Mode  {
         CHAT, TRANSACTIONS
     }
     public static final Mode BLOCKCHAIN_MODE = Mode.TRANSACTIONS;
+
+    /**
+     * serialization path - blockchain is stored to after every new block.
+     * depending on blockchain mode two paths are used.
+     */
     public static final String SERIALIZE_PATH = BLOCKCHAIN_MODE == Mode.CHAT
             ? "./blockchain/src/main/resources/data/blockchain_chat.ser"
             : "./blockchain/src/main/resources/data/blockchain_trans.ser";
+
+    /**
+     * VC reward a miner gets for providing a new block first
+     */
     public static final int BLOCK_REWARD = 100;
 
+    /**
+     * path and length information for clients RSA key pairs.
+     */
     public static final String KEY_PAIRS_PATH_PREFIX = "./blockchain/src/main/resources/data/";
     public static final String PUBLIC_KEY_SUFFIX = "_rsa.pub";
     public static final String PRIVATE_KEY_SUFFIX = "_rsa";
     public static final int RSA_KEY_LENGTH = 1024;
 
+    /**
+     * lower limit for block creation duration: complexity is increased if
+     * last creation time was below this constant.
+     */
     public static final int BLOCK_MIN_CREATION_SECONDS = 1;
+
+    /**
+     * upper limit for block creation duration: complexity is decreased if
+     * last creation time was above this constant.
+     */
     public static final int BLOCK_MAX_CREATION_SECONDS = 3;
+
+    /**
+     * max time interval (i.e. Random.nextInt(MAX_CLIENT_PAUSE_MILLISECONDS) )
+     * between next action (message or transaction) of a client thread
+     */
     public static final int MAX_CLIENT_PAUSE_MILLISECONDS = 500;
 
+    /**
+     * list of the clients with names - each client runs in different thread.
+     */
     public static final List<String> CLIENTS = List.of("Peter", "Mary", "Caspar", "Balthazar");
     public static final int CLIENT_COUNT = CLIENTS.size();
-    public static final int MINER_COUNT = Runtime.getRuntime().availableProcessors() - CLIENT_COUNT;
+
+    private static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
+
+    /**
+     * we create as many miners as we have processors not used by clients - but at least 4 miners:
+     * e.g. for 10 processors of MacBook with M1, we get 4 client and 6 miner threads
+     */
+    public static final int MINER_COUNT = PROCESSORS < CLIENT_COUNT + 4 ? 4 : PROCESSORS - CLIENT_COUNT;
 
     public static final List<String> CHAT_MESSAGES = List.of("Allow Me to Introduce Myself.",
                 "Good afternoon",

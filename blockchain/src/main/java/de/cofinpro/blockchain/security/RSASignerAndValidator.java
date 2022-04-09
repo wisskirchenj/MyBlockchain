@@ -33,7 +33,7 @@ public class RSASignerAndValidator {
 
     /**
      * method to verify a signed message by a receiver regarding authenticity,
-     * The Signable object contains everything to do that (message that was siigned - given by toString(),
+     * The Signable object contains everything to do that (message that was signed - given by toString(),
      * public key and signature).
      * @param signable message to sign
      * @return the verification result.

@@ -27,7 +27,10 @@ public class MagicBlock implements Block {
     private int leadingHashZeros;
     private int minerId = 0;
 
-    public MagicBlock(int id, String previousHash) {
+    /**
+     * package-private access since creation should be done by the factory
+     */
+    MagicBlock(int id, String previousHash) {
         this.id = id;
         this.previousHash = previousHash;
         this.timestamp = new Date().getTime();

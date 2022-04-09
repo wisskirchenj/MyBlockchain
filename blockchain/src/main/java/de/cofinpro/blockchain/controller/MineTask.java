@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 
 /**
  * Callable implementation, that is started in the thread pool (ExecutorService implementation).
- * A Callable<Block> is a functional interface with method signature 'Block call();'.
+ * A Callable<SignedDataBlock> is a functional interface with method signature 'SignedDataBlock call();'.
  */
 public class MineTask implements Callable<SignedDataBlock> {
 

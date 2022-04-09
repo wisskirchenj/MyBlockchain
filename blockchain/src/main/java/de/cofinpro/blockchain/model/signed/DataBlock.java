@@ -22,7 +22,10 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
     protected final MagicBlock block;
     private T data = null;
 
-    public DataBlock(Block block) {
+    /**
+     * package-private access since creation should be done by the factory
+     */
+    DataBlock(Block block) {
         this.block = (MagicBlock) block;
     }
 
@@ -101,7 +104,7 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
      */
     @Override
     public String getDataString() {
-        if (getData().isEmpty()) {
+        if (getData() == null || getData().isEmpty()) {
             return BLOCKCHAIN_MODE == BlockchainConfig.Mode.CHAT ?
                     "Block data: no messages\n": "Block data:\nNo transactions\n";
         }

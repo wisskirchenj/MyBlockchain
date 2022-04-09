@@ -79,7 +79,7 @@ public class BlockchainController {
                 keyGenerator.createKeys(KEY_PAIRS_PATH_PREFIX + CLIENTS.get(i) + PUBLIC_KEY_SUFFIX,
                         KEY_PAIRS_PATH_PREFIX + CLIENTS.get(i) + PRIVATE_KEY_SUFFIX);
                 keyList.add(keyGenerator.getKeyPair());
-                log.info("Private/Public keypair generated for chat client " + CLIENTS.get(i));
+                log.info("Private/Public keypair generated for client " + CLIENTS.get(i));
             }
         } catch (NoSuchAlgorithmException | IOException exception) {
             errorExit("Error RSA-encoding key pair:", exception);
