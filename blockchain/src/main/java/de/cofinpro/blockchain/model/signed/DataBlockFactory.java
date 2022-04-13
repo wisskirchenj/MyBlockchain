@@ -5,13 +5,20 @@ import de.cofinpro.blockchain.model.magic.MagicBlockFactory;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+/**
+ * factory class for generic data block implementing the SignedDataBlock interface. It extends
+ * the MagicBlockFactory and overwrites its createBlock() method to include setting block
+ * data - before (!) the computational method call setHashRelatedFields, that is inherited from
+ * the MagicBlockFactory and not overridden.
+ * @param <T> the type of the block data (List of Signable) to be stored in the created blocks
+ */
 public class DataBlockFactory<T extends List<? extends Signable>> extends MagicBlockFactory {
 
     private final T data;
 
-    public DataBlockFactory(int leadingHashZeros, T chatData) {
+    public DataBlockFactory(int leadingHashZeros, T data) {
         super(leadingHashZeros);
-        this.data = chatData;
+        this.data = data;
     }
 
     /**

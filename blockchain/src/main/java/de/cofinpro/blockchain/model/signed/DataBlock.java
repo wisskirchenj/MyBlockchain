@@ -1,18 +1,17 @@
 package de.cofinpro.blockchain.model.signed;
 
-import de.cofinpro.blockchain.config.BlockchainConfig;
 import de.cofinpro.blockchain.model.core.Block;
 import de.cofinpro.blockchain.model.magic.MagicBlock;
 
 import java.io.Serial;
 import java.util.List;
 
-import static de.cofinpro.blockchain.config.BlockchainConfig.BLOCKCHAIN_MODE;
+import static de.cofinpro.blockchain.config.BlockchainConfig.*;
 
 /**
- * generic abstract data block class implementing the block interface. A DataBlock "decorates" a
+ * generic data block class implementing the SignedDataBlock interface. A DataBlock "decorates" a
  * block with some data storage - in accordance with the Decorator pattern.
- * @param <T> the type of the block data to be stored in the block
+ * @param <T> the type of the block data (List of Signable) to be stored in the block
  */
 public class DataBlock<T extends List<? extends Signable>> implements SignedDataBlock {
 
@@ -105,7 +104,7 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
     @Override
     public String getDataString() {
         if (getData() == null || getData().isEmpty()) {
-            return BLOCKCHAIN_MODE == BlockchainConfig.Mode.CHAT ?
+            return BLOCKCHAIN_MODE == BlockchainMode.CHAT ?
                     "Block data: no messages\n": "Block data:\nNo transactions\n";
         }
         StringBuilder builder = new StringBuilder("Block data:\n");
@@ -124,7 +123,7 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
     }
 
     private String getBlockStateString() {
-        if (BLOCKCHAIN_MODE == BlockchainConfig.Mode.CHAT) {
+        if (BLOCKCHAIN_MODE == BlockchainMode.CHAT) {
             return block.getBlockStateString();
         }
         return String.format("Block:%nCreated by miner%d%nminer%d gets 100 VC %nId: %d%n" +

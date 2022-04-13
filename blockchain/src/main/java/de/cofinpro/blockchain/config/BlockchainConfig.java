@@ -15,24 +15,35 @@ public class BlockchainConfig {
     /**
      * creation stops after this length constant is reached
      */
-    public static final int BLOCKCHAIN_LENGTH = 8;
+    public static final int BLOCKCHAIN_LENGTH = 47;
 
     /**
-     * setting of Mode defines, if blockchain encrypts chat messages or VC transactions,
+     * enum type that also defines a value-dependent serializationPath.
+     */
+    public enum BlockchainMode  {
+        CHAT("./blockchain/src/main/resources/data/blockchain_chat.ser"),
+        TRANSACTIONS("./blockchain/src/main/resources/data/blockchain_trans.ser");
+
+        private final String serializationPath;
+
+        BlockchainMode(String serializationPath) {
+            this.serializationPath = serializationPath;
+        }
+
+        /**
+         * serialization path - blockchain is stored to after every new block.
+         * depending on blockchain mode two paths are used.
+         */
+        public String getSerializationPath() {
+            return serializationPath;
+        }
+    }
+
+    /**
+     * setting of BlockchainMode defines, if blockchain encrypts chat messages or VC transactions,
      * VC being our virtual coins (as bitcoins).
      */
-    public enum Mode  {
-        CHAT, TRANSACTIONS
-    }
-    public static final Mode BLOCKCHAIN_MODE = Mode.TRANSACTIONS;
-
-    /**
-     * serialization path - blockchain is stored to after every new block.
-     * depending on blockchain mode two paths are used.
-     */
-    public static final String SERIALIZE_PATH = BLOCKCHAIN_MODE == Mode.CHAT
-            ? "./blockchain/src/main/resources/data/blockchain_chat.ser"
-            : "./blockchain/src/main/resources/data/blockchain_trans.ser";
+    public static final BlockchainMode BLOCKCHAIN_MODE = BlockchainMode.TRANSACTIONS;
 
     /**
      * VC reward a miner gets for providing a new block first
@@ -63,7 +74,7 @@ public class BlockchainConfig {
      * max time interval (i.e. Random.nextInt(MAX_CLIENT_PAUSE_MILLISECONDS) )
      * between next action (message or transaction) of a client thread
      */
-    public static final int MAX_CLIENT_PAUSE_MILLISECONDS = 500;
+    public static final int MAX_CLIENT_PAUSE_MILLISECONDS = 700;
 
     /**
      * list of the clients with names - each client runs in different thread.

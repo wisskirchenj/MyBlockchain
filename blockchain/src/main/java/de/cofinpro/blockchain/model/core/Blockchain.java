@@ -74,7 +74,7 @@ public class Blockchain extends LinkedList<Block> {
                 isEmpty() ? null : getLast())) {
             return false;
         }
-        if (BLOCKCHAIN_MODE == Mode.TRANSACTIONS) {
+        if (BLOCKCHAIN_MODE == BlockchainMode.TRANSACTIONS) {
             addToLedger(newBlock.getMinerId());
         }
         add(newBlock);
@@ -128,7 +128,7 @@ public class Blockchain extends LinkedList<Block> {
      * and the invoking frequency is moderate...
      * The blockchain validates all incoming signed chat messages - for their signature authenticity as well
      * as for the validity of the message id given.
-     * However, it is safer to synchronize - esp. with pollChat below, which is called by the Controller-thread
+     * However, it is safer to synchronize - esp. with pollData below, which is called by the Controller-thread
      * who drains the queue.
      * @param signedMessage new chat message to offer to the concurrent message queue.
      */
@@ -211,11 +211,11 @@ public class Blockchain extends LinkedList<Block> {
      */
     private String getChangeOfZeroText(int leadingZeros, int nextLeadingZeros) {
         if (leadingZeros > nextLeadingZeros) {
-            return "N was decreased by %d%n%n".formatted(leadingZeros - nextLeadingZeros);
+            return "Complexity (# of leading hash zeros) was decreased by %d%n%n".formatted(leadingZeros - nextLeadingZeros);
         } else if (leadingZeros < nextLeadingZeros) {
-            return "N was increased to %d%n%n".formatted(nextLeadingZeros);
+            return "Complexity (# of leading hash zeros) was increased to %d%n%n".formatted(nextLeadingZeros);
         }
-        return "N stays the same\n\n";
+        return "Complexity (# of leading hash zeros) stays the same\n\n";
     }
 
     @Override

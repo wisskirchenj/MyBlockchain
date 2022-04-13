@@ -59,9 +59,9 @@ public class BlockchainController {
     private void startClients(ExecutorService clients) {
         List <KeyPair> keys = generateKeyPairs();
         for (int i = 0; i < CLIENT_COUNT; i++) {
-            if (BLOCKCHAIN_MODE == Mode.CHAT) {
+            if (BLOCKCHAIN_MODE == BlockchainMode.CHAT) {
                 clients.submit(new ChatClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
-            } else if (BLOCKCHAIN_MODE == Mode.TRANSACTIONS) {
+            } else if (BLOCKCHAIN_MODE == BlockchainMode.TRANSACTIONS) {
                 clients.submit(new TransactionClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
             }
         }

@@ -8,7 +8,8 @@ topics are investigated.
 
 ## Repository Contents
 
-Beside the main project tasks (6 stages), all relevant Topic-associated development tasks are included.
+Beside the sources of main project tasks (6 stages), all relevant Topic-associated development tasks of the academy 
+course path are included.
 
 ## Program description
 
