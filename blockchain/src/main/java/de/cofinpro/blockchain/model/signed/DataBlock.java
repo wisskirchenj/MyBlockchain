@@ -103,7 +103,7 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
      */
     @Override
     public String getDataString() {
-        if (getData() == null || getData().isEmpty()) {
+        if (getData().isEmpty()) {
             return BLOCKCHAIN_MODE == BlockchainMode.CHAT ?
                     "Block data: no messages\n": "Block data:\nNo transactions\n";
         }

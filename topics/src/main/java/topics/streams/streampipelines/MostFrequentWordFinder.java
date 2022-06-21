@@ -1,7 +1,10 @@
 package topics.streams.streampipelines;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.reverseOrder;
 
 /**
  * Write a program that reads a text (in the UTF-8) from the standard input. The program must count the frequency of
@@ -30,5 +33,19 @@ public class MostFrequentWordFinder {
                 .distinct()
                 .limit(10)
                 .forEach(System.out::println);
+    }
+
+   static void main2(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String words = sc.nextLine().toLowerCase().replaceAll("[^[\\w\\s]]", "");
+
+        Arrays.stream(words.split(" "))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .sorted(Map.Entry.comparingByValue(reverseOrder()))
+                .limit(10)
+                .forEach(i -> System.out.println(i.getKey()));
     }
 }
