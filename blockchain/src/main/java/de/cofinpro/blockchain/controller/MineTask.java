@@ -1,10 +1,10 @@
 package de.cofinpro.blockchain.controller;
 
 import de.cofinpro.blockchain.model.signed.DataBlockFactory;
+import de.cofinpro.blockchain.model.signed.SerializableList;
 import de.cofinpro.blockchain.model.signed.Signable;
 import de.cofinpro.blockchain.model.signed.SignedDataBlock;
 
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -15,9 +15,9 @@ public class MineTask implements Callable<SignedDataBlock> {
 
     private final int id;
     private final String previousHash;
-    private final DataBlockFactory<List<Signable>> blockFactory;
+    private final DataBlockFactory<? extends SerializableList<Signable>> blockFactory;
 
-    public MineTask(DataBlockFactory<List<Signable>> blockFactory, int id, String previousHash) {
+    public MineTask(DataBlockFactory<? extends SerializableList<Signable>> blockFactory, int id, String previousHash) {
         this.blockFactory = blockFactory;
         this.id = id;
         this.previousHash = previousHash;

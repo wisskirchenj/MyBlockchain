@@ -4,22 +4,22 @@ import de.cofinpro.blockchain.model.core.Block;
 import de.cofinpro.blockchain.model.magic.MagicBlock;
 
 import java.io.Serial;
-import java.util.List;
 
 import static de.cofinpro.blockchain.config.BlockchainConfig.*;
 
 /**
  * generic data block class implementing the SignedDataBlock interface. A DataBlock "decorates" a
  * block with some data storage - in accordance with the Decorator pattern.
- * @param <T> the type of the block data (List of Signable) to be stored in the block
+ * @param <L> the type of the block data (List of Signable) to be stored in the block
  */
-public class DataBlock<T extends List<? extends Signable>> implements SignedDataBlock {
+public class DataBlock<L extends SerializableList<Signable>> implements SignedDataBlock {
 
     @Serial
     private static final long serialVersionUID = 71L;
 
     protected final MagicBlock block;
-    private T data = null;
+
+    private L data = null;
 
     /**
      * package-private access since creation should be done by the factory
@@ -31,14 +31,14 @@ public class DataBlock<T extends List<? extends Signable>> implements SignedData
     /**
      * @return the block data of generic type T
      */
-    public T getData() {
+    public L getData() {
         return data;
     }
 
     /**
      * @param data the block data of generic type T
      */
-    public void setData(T data) {
+    public void setData(L data) {
         this.data = data;
     }
 

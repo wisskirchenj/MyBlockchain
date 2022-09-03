@@ -31,12 +31,12 @@ public class BlockchainValidator {
         while (previousIterator.hasNext()) {
             block = currentIterator.next();
             Block previousBlock = previousIterator.next();
-            if (!isBlockValid(block, block.getLeadingHashZeros(), previousBlock)) {
+            if (isBlockInvalid(block, block.getLeadingHashZeros(), previousBlock)) {
                 throw new InvalidBlockchainException(ERROR);
             }
             validateBlockData(blockchain, block, previousBlock);
         }
-        if (!isBlockValid(block, block.getLeadingHashZeros(), null)) {
+        if (isBlockInvalid(block, block.getLeadingHashZeros(), null)) {
             throw new InvalidBlockchainException(ERROR);
         }
     }
@@ -74,12 +74,12 @@ public class BlockchainValidator {
      * @param previous the previous block in the chain or null if chain was empty
      * @return validation result
      */
-    public boolean isBlockValid(Block block, int leadingHashZeros, Block previous) {
+    public boolean isBlockInvalid(Block block, int leadingHashZeros, Block previous) {
         boolean valid = block.getHash().startsWith("0".repeat(leadingHashZeros));
         if (previous != null) {
             valid &= block.hashMatchesPrevious(previous);
         }
-        return valid;
+        return !valid;
     }
 
     /**

@@ -1,10 +1,7 @@
 package de.cofinpro.blockchain.model.core;
 
 import de.cofinpro.blockchain.config.BlockchainConfig;
-import de.cofinpro.blockchain.model.signed.SignedMessage;
-import de.cofinpro.blockchain.model.signed.Signable;
-import de.cofinpro.blockchain.model.signed.SignedDataBlock;
-import de.cofinpro.blockchain.model.signed.SignedTransaction;
+import de.cofinpro.blockchain.model.signed.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
@@ -21,7 +18,6 @@ import static de.cofinpro.blockchain.config.BlockchainConfig.*;
  * a static BlockchainValidator, that comprises all internal validation logic.
  * Beside chaining and validating blocks, the blockchain class regulates the computation time for the
  * next block by adapting a complexity in terms of leadingHashZeros for the upcoming block.
- *
  * Further it keeps a concurrent message queue for signable (from stage 5 on) data, which are stored as block data
  * and offers methods to accept and poll data.
  * (would be better to single data storage handling out of this class, but it's strictly specified by hyperskill...)
@@ -53,8 +49,9 @@ public class Blockchain extends LinkedList<Block> {
      * @param newBlock the received block
      * @return false if block invalid (it is not added in that case), true else
      */
+    @SuppressWarnings("unused")
     public boolean addBlock(Block newBlock) {
-        if (!VALIDATOR.isBlockValid(newBlock, currentLeadingHashZeros,
+        if (VALIDATOR.isBlockInvalid(newBlock, currentLeadingHashZeros,
                 isEmpty() ? null : getLast())) {
             return false;
         }
@@ -70,7 +67,7 @@ public class Blockchain extends LinkedList<Block> {
      * @return false if block invalid (it is not added in that case), true else
      */
     public boolean addDataBlock(SignedDataBlock newBlock) {
-        if (!VALIDATOR.isBlockValid(newBlock, currentLeadingHashZeros,
+        if (VALIDATOR.isBlockInvalid(newBlock, currentLeadingHashZeros,
                 isEmpty() ? null : getLast())) {
             return false;
         }
@@ -149,8 +146,8 @@ public class Blockchain extends LinkedList<Block> {
      * the queue is created here on first call and synchronization prevents race condition with sender threads.
      * @return the chat messages as list
      */
-    public synchronized List<Signable> pollData() {
-        List<Signable> data = new ArrayList<>();
+    public synchronized SerializableList<Signable> pollData() {
+        SerializableList<Signable> data = new SerializableArrayList<>();
         if (clientDataQueue == null) {
             clientDataQueue = new ConcurrentLinkedQueue<>();
         }

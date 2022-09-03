@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 import static de.cofinpro.blockchain.config.BlockchainConfig.*;
+import static de.cofinpro.blockchain.config.BlockchainConfig.BlockchainMode.CHAT;
 
 /**
  * Application logic class, that contains the run() method started by Main.
@@ -58,13 +60,11 @@ public class BlockchainController {
      */
     private void startClients(ExecutorService clients) {
         List <KeyPair> keys = generateKeyPairs();
-        for (int i = 0; i < CLIENT_COUNT; i++) {
-            if (BLOCKCHAIN_MODE == BlockchainMode.CHAT) {
-                clients.submit(new ChatClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
-            } else if (BLOCKCHAIN_MODE == BlockchainMode.TRANSACTIONS) {
-                clients.submit(new TransactionClientTask(blockchain, CLIENTS.get(i), keys.get(i)));
-            }
-        }
+        IntStream.range(0, CLIENT_COUNT)
+                .forEach(i -> clients.submit(BLOCKCHAIN_MODE == CHAT
+                        ? new ChatClientTask(blockchain, CLIENTS.get(i), keys.get(i))
+                        : new TransactionClientTask(blockchain, CLIENTS.get(i), keys.get(i))
+                        ));
     }
 
     /**

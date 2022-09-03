@@ -31,6 +31,7 @@ public abstract class ClientTask implements Runnable {
      * Simultaneously listening to interrupt - probably superfluous since thread mostly sleeps.
      */
     @Override
+    @SuppressWarnings("BusyWait")
     public void run() {
         try {
             while (!Thread.interrupted()) {
@@ -39,6 +40,8 @@ public abstract class ClientTask implements Runnable {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }  catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

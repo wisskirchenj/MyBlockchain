@@ -34,6 +34,10 @@ public class TransactionClientTask extends ClientTask {
         }
         String moneySender = ledger.keySet().stream().toList()
                 .get(RANDOM.nextInt(ledger.size()));
+        if (ledger.get(moneySender) == 0) {
+            return;
+        }
+
         int tryAmount = findRandomAmount(ledger.get(moneySender));
         String moneyReceiver = findRandomReceiver(moneySender);
         SignedTransaction transaction =

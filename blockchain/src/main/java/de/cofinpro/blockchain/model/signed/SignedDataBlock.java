@@ -2,8 +2,6 @@ package de.cofinpro.blockchain.model.signed;
 
 import de.cofinpro.blockchain.model.core.Block;
 
-import java.util.List;
-
 /**
  * classes implementing this interface carry a list of RSA-signable data objects
  * as block data.
@@ -17,5 +15,5 @@ public interface SignedDataBlock extends Block {
      */
     String getDataString();
 
-    List<? extends Signable> getData();
+    SerializableList<Signable> getData();
 }

@@ -15,7 +15,7 @@ public class BlockchainConfig {
     /**
      * creation stops after this length constant is reached
      */
-    public static final int BLOCKCHAIN_LENGTH = 10;
+    public static final int BLOCKCHAIN_LENGTH = 20;
 
     /**
      * enum type that also defines a value-dependent serializationPath.
@@ -43,7 +43,7 @@ public class BlockchainConfig {
      * setting of BlockchainMode defines, if blockchain encrypts chat messages or VC transactions,
      * VC being our virtual coins (as bitcoins).
      */
-    public static final BlockchainMode BLOCKCHAIN_MODE = BlockchainMode.CHAT;
+    public static final BlockchainMode BLOCKCHAIN_MODE = BlockchainMode.TRANSACTIONS;
 
     /**
      * VC reward a miner gets for providing a new block first

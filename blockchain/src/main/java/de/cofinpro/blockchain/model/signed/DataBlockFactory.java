@@ -3,20 +3,19 @@ package de.cofinpro.blockchain.model.signed;
 import de.cofinpro.blockchain.model.magic.MagicBlockFactory;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 /**
  * factory class for generic data block implementing the SignedDataBlock interface. It extends
  * the MagicBlockFactory and overwrites its createBlock() method to include setting block
  * data - before (!) the computational method call setHashRelatedFields, that is inherited from
  * the MagicBlockFactory and not overridden.
- * @param <T> the type of the block data (List of Signable) to be stored in the created blocks
+ * @param <L> the type of the block data (List of Signable) to be stored in the created blocks
  */
-public class DataBlockFactory<T extends List<? extends Signable>> extends MagicBlockFactory {
+public class DataBlockFactory<L extends SerializableList<Signable>> extends MagicBlockFactory {
 
-    private final T data;
+    private final L data;
 
-    public DataBlockFactory(int leadingHashZeros, T data) {
+    public DataBlockFactory(int leadingHashZeros, L data) {
         super(leadingHashZeros);
         this.data = data;
     }
@@ -29,14 +28,14 @@ public class DataBlockFactory<T extends List<? extends Signable>> extends MagicB
      */
     @Override
     public SignedDataBlock createBlock(int id, String previousHash) throws NoSuchAlgorithmException {
-        DataBlock<T> block = newBlockInstance(id, previousHash);
+        DataBlock<L> block = newBlockInstance(id, previousHash);
         setBlockData(block);
         setHashRelatedFields(block);
         return block;
     }
 
     @Override
-    protected DataBlock<T> newBlockInstance(int id, String previousHash) {
+    protected DataBlock<L> newBlockInstance(int id, String previousHash) {
         return new DataBlock<>(super.newBlockInstance(id, previousHash));
     }
 
@@ -46,7 +45,7 @@ public class DataBlockFactory<T extends List<? extends Signable>> extends MagicB
      * is always of type ChatDataBlock.
      * @param block newly created block instance of type ChatDataBlock
      */
-    protected void setBlockData(DataBlock<T> block) {
+    protected void setBlockData(DataBlock<L> block) {
         block.setData(data);
         String threadName = Thread.currentThread().getName();
         block.setMinerId(Integer.parseInt(threadName.substring(threadName.lastIndexOf('-') + 1)));
