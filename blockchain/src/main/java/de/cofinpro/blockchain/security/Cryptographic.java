@@ -28,7 +28,7 @@ public class Cryptographic {
         StringBuilder hexString = new StringBuilder();
         for (byte elem: hash) {
             String hex = Integer.toHexString(0xff & elem);
-            if(hex.length() == 1) hexString.append('0');
+            if (hex.length() == 1) hexString.append('0');
             hexString.append(hex);
         }
         return hexString.toString();

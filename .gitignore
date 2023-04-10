@@ -136,3 +136,5 @@ mvnw*
 HELP.md
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,java
+*rsa
+*rsa.pub

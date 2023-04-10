@@ -31,6 +31,7 @@ public class DataBlock<L extends SerializableList<Signable>> implements SignedDa
     /**
      * @return the block data of generic type T
      */
+    @Override
     public L getData() {
         return data;
     }
