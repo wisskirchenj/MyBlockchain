@@ -2,7 +2,11 @@ package de.cofinpro.blockchain.security;
 
 import de.cofinpro.blockchain.model.signed.Signable;
 
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
 
 /**
  * Helper class with static methods to sign a message with a private key and verify a received signature

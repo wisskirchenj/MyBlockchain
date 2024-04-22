@@ -1,8 +1,12 @@
 package de.cofinpro.blockchain.security;
 
+import lombok.Getter;
+
 import java.io.FileWriter;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * generator class, that is instantiated for the prupose of creating an RSA keypair.
@@ -13,6 +17,7 @@ import java.security.*;
 public class RSAGenerator {
 
     private final KeyPairGenerator keyGen;
+    @Getter
     private KeyPair keyPair;
 
     public RSAGenerator(int keyLength) throws NoSuchAlgorithmException {
@@ -33,9 +38,5 @@ public class RSAGenerator {
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
-    }
-
-    public KeyPair getKeyPair() {
-        return keyPair;
     }
 }
